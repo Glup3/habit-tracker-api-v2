@@ -1,0 +1,23 @@
+{
+  "name": "habit-tracker-api-v2",
+  "version": "1.0.0",
+  "description": "API v2 for Habit Tracker",
+  "main": "src/index.ts",
+  "scripts": {
+    "lint": "eslint '*/**/*.{js,ts,tsx}' --quiet --fix",
+    "dev": "ts-node-dev --tree-kill --no-notify --respawn --transpile-only src/index.ts",
+    "start": "npm run dev"
+  },
+  "author": "Phuc Tran",
+  "license": "MIT",
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^4.6.0",
+    "@typescript-eslint/parser": "^4.6.0",
+    "eslint": "^7.12.1",
+    "eslint-config-prettier": "^6.15.0",
+    "eslint-plugin-prettier": "^3.1.4",
+    "prettier": "^2.1.2",
+    "ts-node-dev": "^1.0.0",
+    "typescript": "^4.0.5"
+  }
+}
