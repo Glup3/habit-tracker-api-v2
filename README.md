@@ -8,3 +8,11 @@
 - TypeORM
 - Apollo Server
 - PostgreSQL
+- JWT Authentication (Cookie based)
+
+## TODOS
+
+- Error Handling
+- Input Validation
+- Unit Tests
+- Business Logic

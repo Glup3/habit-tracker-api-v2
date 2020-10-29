@@ -34,6 +34,9 @@ export class User {
   @CreateDateColumn()
   createdAt: Date;
 
+  @Column('int', { default: 0 })
+  tokenCount: number;
+
   @Field((type) => [Habit])
   @OneToMany((type) => Habit, (habit) => habit.user, { onDelete: 'CASCADE' })
   habits: Habit[];

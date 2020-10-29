@@ -12,5 +12,9 @@
     "module": "CommonJS",
     "strictPropertyInitialization": false,
     "forceConsistentCasingInFileNames": true,
+    "typeRoots": [
+      "./types",
+      "./node_modules/@types"
+    ]
   }
 }
