@@ -1,0 +1,23 @@
+Table users {
+  id int [pk]
+  email varchar [not null, unique]
+  password varchar [not null]
+  username varchar
+  firstname varchar
+  lastname varchar
+  createdAt date
+}
+
+Table habits {
+  id int [pk]
+  title varchar [not null]
+  description varchar
+  startDate date
+  userId int [ref: > users.id]
+}
+
+Table entries {
+  id int [pk]
+  entryDate date
+  habitId int [ref: > habits.id]
+}

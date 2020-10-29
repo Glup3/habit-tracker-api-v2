@@ -4,3 +4,7 @@
 
 - GraphQL
 - TypeScript
+- TypeGraphQL
+- TypeORM
+- Apollo Server
+- PostgreSQL

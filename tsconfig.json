@@ -3,8 +3,14 @@
     "sourceMap": true,
     "outDir": "build",
     "strict": true,
-    "lib": ["esnext", "DOM"],
+    "lib": ["ES2018", "DOM", "ESNext.AsyncIterable"],
     "esModuleInterop": true,
-    "rootDir": "src"
+    "rootDir": "src",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "target": "ES2018",
+    "module": "CommonJS",
+    "strictPropertyInitialization": false,
+    "forceConsistentCasingInFileNames": true,
   }
 }
