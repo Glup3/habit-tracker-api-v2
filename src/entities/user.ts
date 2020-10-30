@@ -11,14 +11,13 @@ export class User {
   id: number;
 
   @Field()
-  @Column()
+  @Column({ unique: true })
   email: string;
 
   @Field()
-  @Column()
+  @Column({ unique: true })
   username: string;
 
-  @Field()
   @Column()
   password: string;
 

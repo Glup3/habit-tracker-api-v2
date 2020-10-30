@@ -1,8 +1,8 @@
 import { Arg, Mutation, Query, Resolver } from 'type-graphql';
 import { Repository } from 'typeorm';
 import { InjectRepository } from 'typeorm-typedi-extensions';
-import { User } from '../entities/user';
-import { AddUserInput } from './types/user-input';
+import { User } from '../../entities/user';
+import { AddUserInput } from './user-input';
 
 @Resolver(User)
 export class UserResolver {

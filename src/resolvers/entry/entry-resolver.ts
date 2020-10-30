@@ -1,9 +1,9 @@
 import { Arg, Mutation, Query, Resolver } from 'type-graphql';
 import { Repository } from 'typeorm';
 import { InjectRepository } from 'typeorm-typedi-extensions';
-import { Entry } from '../entities/entry';
-import { Habit } from '../entities/habit';
-import { AddEntryInput } from './types/entry-input';
+import { Entry } from '../../entities/entry';
+import { Habit } from '../../entities/habit';
+import { AddEntryInput } from './entry-input';
 
 @Resolver(Entry)
 export class EntryResolver {

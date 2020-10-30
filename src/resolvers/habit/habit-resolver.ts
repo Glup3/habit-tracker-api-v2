@@ -1,9 +1,9 @@
 import { Arg, Mutation, Query, Resolver } from 'type-graphql';
 import { Repository } from 'typeorm';
 import { InjectRepository } from 'typeorm-typedi-extensions';
-import { Habit } from '../entities/habit';
-import { User } from '../entities/user';
-import { AddHabitInput } from './types/habit-input';
+import { Habit } from '../../entities/habit';
+import { User } from '../../entities/user';
+import { AddHabitInput } from './habit-input';
 
 @Resolver(Habit)
 export class HabitResolver {

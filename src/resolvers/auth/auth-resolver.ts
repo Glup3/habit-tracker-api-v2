@@ -3,23 +3,23 @@ import { Repository } from 'typeorm';
 import { InjectRepository } from 'typeorm-typedi-extensions';
 import bcrypt from 'bcryptjs';
 
-import { User } from '../entities/user';
-import { LoginInput, RegisterInput } from './types/auth-input';
-import { createTokens, invalidateTokens } from '../auth';
+import { User } from '../../entities/user';
+import { LoginInput, RegisterInput } from './auth-input';
+import { createTokens, invalidateTokens } from '../../auth';
 import {
   ACCESS_TOKEN_EXPIRE_TIME,
   COOKIE_ACCESS_TOKEN,
   COOKIE_REFRESH_TOKEN,
   REFRESH_TOKEN_EXPIRE_TIME
-} from '../constants';
-import { Context } from '../types/context.interface';
+} from '../../constants';
+import { Context } from '../../types/context.interface';
 
 @Resolver(User)
 export class AuthResolver {
   constructor(@InjectRepository(User) private userRepository: Repository<User>) {}
 
-  @Mutation(() => Boolean)
-  async register(@Arg('data') data: RegisterInput): Promise<boolean> {
+  @Mutation(() => User)
+  async register(@Arg('data') data: RegisterInput): Promise<User> {
     const hashedPassword = await bcrypt.hash(data.password, 10);
     const user = this.userRepository.create({
       email: data.email,
@@ -29,9 +29,8 @@ export class AuthResolver {
       lastname: data.lastname,
       habits: []
     });
-    await this.userRepository.save(user);
 
-    return true;
+    return await this.userRepository.save(user);
   }
 
   @Mutation(() => User)
