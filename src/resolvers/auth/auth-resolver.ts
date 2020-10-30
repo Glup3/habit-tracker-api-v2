@@ -1,4 +1,4 @@
-import { Arg, Ctx, Mutation, Query, Resolver } from 'type-graphql';
+import { Arg, Ctx, Mutation, Query, Resolver, UseMiddleware } from 'type-graphql';
 import { Repository } from 'typeorm';
 import { InjectRepository } from 'typeorm-typedi-extensions';
 import bcrypt from 'bcryptjs';
@@ -13,6 +13,7 @@ import {
   REFRESH_TOKEN_EXPIRE_TIME
 } from '../../constants';
 import { Context } from '../../types/context.interface';
+import { Authenticated } from '../../middlewares/authenticated';
 
 @Resolver(User)
 export class AuthResolver {
@@ -54,12 +55,9 @@ export class AuthResolver {
   }
 
   @Query(() => User)
+  @UseMiddleware(Authenticated)
   me(@Ctx() ctx: Context): Promise<User | undefined> {
-    if (!ctx.req.username) {
-      throw Error('GG');
-    }
-
-    return this.userRepository.findOne({ username: ctx.req.username });
+    return this.userRepository.findOne({ where: { username: ctx.req.username }, relations: ['habits'] });
   }
 
   @Mutation(() => Boolean)

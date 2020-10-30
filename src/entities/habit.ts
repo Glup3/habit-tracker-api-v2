@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
+import { Length, MaxLength } from 'class-validator';
 import { Field, ID, ObjectType } from 'type-graphql';
 import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Entry } from './entry';
@@ -14,10 +15,12 @@ export class Habit {
 
   @Field()
   @Column()
+  @MaxLength(64)
   title: string;
 
   @Field()
   @Column()
+  @Length(30, 255)
   description: string;
 
   @Field()

@@ -1,8 +1,11 @@
-import { Arg, Mutation, Query, Resolver } from 'type-graphql';
+import { Arg, Ctx, Mutation, Query, Resolver, UseMiddleware } from 'type-graphql';
 import { Repository } from 'typeorm';
 import { InjectRepository } from 'typeorm-typedi-extensions';
 import { Habit } from '../../entities/habit';
 import { User } from '../../entities/user';
+import { Authenticated } from '../../middlewares/authenticated';
+import { HabitOwner } from '../../middlewares/habitOwner';
+import { Context } from '../../types/context.interface';
 import { AddHabitInput } from './habit-input';
 
 @Resolver(Habit)
@@ -19,13 +22,16 @@ export class HabitResolver {
     });
   }
 
-  @Mutation(() => Habit)
-  async addHabit(@Arg('data') data: AddHabitInput): Promise<Habit> {
-    const user = await this.userRepository.findOne(data.userId);
+  @Query(() => Habit)
+  @UseMiddleware(HabitOwner)
+  habit(@Arg('id') id: number): Promise<Habit> {
+    return this.habitRepository.findOneOrFail(id, { relations: ['entries'] });
+  }
 
-    if (!user) {
-      throw Error('gg');
-    }
+  @Mutation(() => Habit)
+  @UseMiddleware(Authenticated)
+  async addHabit(@Arg('data') data: AddHabitInput, @Ctx() ctx: Context): Promise<Habit> {
+    const user = await this.userRepository.findOneOrFail({ username: ctx.req.username });
 
     const habit = this.habitRepository.create({
       user: user,

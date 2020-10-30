@@ -39,6 +39,17 @@ const loginMutation = `
   }
 `;
 
+const meQuery = `
+  query Me {
+    me {
+      email
+      username
+      firstname
+      lastname
+    } 
+  }
+`;
+
 describe('Auth Resolver', () => {
   test('if Register with normal args works properly', async () => {
     const user = {
@@ -104,5 +115,41 @@ describe('Auth Resolver', () => {
         }
       }
     });
+  });
+
+  test('if Me with user works properly', async () => {
+    const user = userRepository.create({
+      email: faker.internet.email(),
+      password: faker.internet.password(),
+      username: faker.name.findName(),
+      firstname: faker.name.firstName(),
+      lastname: faker.name.lastName(),
+      habits: []
+    });
+    await userRepository.save(user);
+
+    const response = await gCall({
+      source: meQuery,
+      username: user.username
+    });
+
+    expect(response).toMatchObject({
+      data: {
+        me: {
+          email: user.email,
+          username: user.username,
+          firstname: user.firstname,
+          lastname: user.lastname
+        }
+      }
+    });
+  });
+
+  test('if Me with no user returns error', async () => {
+    const response = await gCall({
+      source: meQuery
+    });
+
+    expect(response.errors?.length).toBeGreaterThan(0);
   });
 });

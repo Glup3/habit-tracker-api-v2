@@ -5,9 +5,6 @@ import { Habit } from '../../entities/habit';
 
 @InputType()
 export class AddHabitInput implements Partial<Habit> {
-  @Field((type) => ID)
-  userId: number;
-
   @Field()
   title: string;
 
