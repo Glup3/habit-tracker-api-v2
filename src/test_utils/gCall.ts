@@ -8,17 +8,26 @@ interface Options {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     [key: string]: any;
   }>;
+  username?: string;
 }
 
 let schema: GraphQLSchema;
 
-export const gCall = async ({ source, variableValues }: Options): Promise<ExecutionResult> => {
+export const gCall = async ({ source, variableValues, username }: Options): Promise<ExecutionResult> => {
   if (!schema) {
     schema = await createSchema();
   }
   return graphql({
     schema,
     source,
-    variableValues
+    variableValues,
+    contextValue: {
+      req: {
+        username
+      },
+      res: {
+        cookie: jest.fn()
+      }
+    }
   });
 };

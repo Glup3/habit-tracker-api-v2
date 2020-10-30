@@ -28,8 +28,19 @@ const registerMutation = `
   }
 `;
 
+const loginMutation = `
+  mutation Login($data: LoginInput!) {
+    login(data: $data) {
+      username
+      email
+      firstname
+      lastname
+    }
+  }
+`;
+
 describe('Auth Resolver', () => {
-  it('register user', async () => {
+  test('if Register with normal args works properly', async () => {
     const user = {
       email: faker.internet.email(),
       password: faker.internet.password(),
@@ -57,5 +68,41 @@ describe('Auth Resolver', () => {
     const dbUser = await userRepository.findOne({ email: user.email });
     expect(dbUser).toBeDefined();
     expect(dbUser?.email).toEqual(user.email);
+  });
+
+  test('if Login with correct credentials works properly', async () => {
+    const user = {
+      email: faker.internet.email(),
+      password: faker.internet.password(),
+      username: faker.name.findName(),
+      firstname: faker.name.firstName(),
+      lastname: faker.name.lastName()
+    };
+
+    await gCall({
+      source: registerMutation,
+      variableValues: { data: user }
+    });
+
+    const response = await gCall({
+      source: loginMutation,
+      variableValues: {
+        data: {
+          email: user.email,
+          password: user.password
+        }
+      }
+    });
+
+    expect(response).toMatchObject({
+      data: {
+        login: {
+          email: user.email,
+          username: user.username,
+          firstname: user.firstname,
+          lastname: user.lastname
+        }
+      }
+    });
   });
 });
