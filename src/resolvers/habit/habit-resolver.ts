@@ -1,4 +1,4 @@
-import { Arg, Ctx, Mutation, Query, Resolver, UseMiddleware } from 'type-graphql';
+import { Arg, Ctx, Int, Mutation, Query, Resolver, UseMiddleware } from 'type-graphql';
 import { Repository } from 'typeorm';
 import { InjectRepository } from 'typeorm-typedi-extensions';
 import { Habit } from '../../entities/habit';
@@ -16,15 +16,15 @@ export class HabitResolver {
   ) {}
 
   @Query(() => [Habit])
-  habits(): Promise<Habit[]> {
-    return this.habitRepository.find({
-      relations: ['user', 'entries']
-    });
+  @UseMiddleware(Authenticated)
+  async myHabits(@Ctx() ctx: Context): Promise<Habit[]> {
+    const user = await this.userRepository.findOneOrFail({ username: ctx.req.username });
+    return this.habitRepository.find({ where: { user }, relations: ['user', 'entries'], order: { title: 'ASC' } });
   }
 
   @Query(() => Habit)
-  @UseMiddleware(HabitOwner)
-  habit(@Arg('id') id: number): Promise<Habit> {
+  @UseMiddleware(Authenticated, HabitOwner)
+  habit(@Arg('id', () => Int) id: number): Promise<Habit> {
     return this.habitRepository.findOneOrFail(id, { relations: ['entries'] });
   }
 
@@ -44,13 +44,13 @@ export class HabitResolver {
     return await this.habitRepository.save(habit);
   }
 
-  @Mutation(() => Boolean)
-  async removeHabit(@Arg('id') id: number): Promise<boolean> {
-    try {
-      await this.habitRepository.delete(id);
-      return true;
-    } catch {
-      return false;
-    }
+  @Mutation(() => Habit)
+  @UseMiddleware(Authenticated, HabitOwner)
+  async removeHabit(@Arg('id', (type) => Int) id: number): Promise<Habit> {
+    const habit = await this.habitRepository.findOneOrFail(id);
+    const deletedHabit = await this.habitRepository.remove(habit);
+    deletedHabit.id = id;
+
+    return deletedHabit;
   }
 }

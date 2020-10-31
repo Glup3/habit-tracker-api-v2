@@ -55,7 +55,7 @@ describe('Auth Resolver', () => {
     const user = {
       email: faker.internet.email(),
       password: faker.internet.password(),
-      username: faker.name.findName(),
+      username: faker.internet.userName(),
       firstname: faker.name.firstName(),
       lastname: faker.name.lastName()
     };
@@ -85,7 +85,7 @@ describe('Auth Resolver', () => {
     const user = {
       email: faker.internet.email(),
       password: faker.internet.password(),
-      username: faker.name.findName(),
+      username: faker.internet.userName(),
       firstname: faker.name.firstName(),
       lastname: faker.name.lastName()
     };
@@ -121,7 +121,7 @@ describe('Auth Resolver', () => {
     const user = userRepository.create({
       email: faker.internet.email(),
       password: faker.internet.password(),
-      username: faker.name.findName(),
+      username: faker.internet.userName(),
       firstname: faker.name.firstName(),
       lastname: faker.name.lastName(),
       habits: []

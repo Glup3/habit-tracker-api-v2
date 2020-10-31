@@ -25,7 +25,7 @@ export class HabitOwner implements MiddlewareInterface<Context> {
     });
 
     if (!isOwner) {
-      throw new Error('User has no permission');
+      throw new Error(`Habit with the ID ${args.id} does not exist`);
     }
 
     return next();

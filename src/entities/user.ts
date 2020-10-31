@@ -1,7 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { IsEmail, Length, MaxLength } from 'class-validator';
+import { IsAlphanumeric, IsEmail, Length, MaxLength } from 'class-validator';
 import { ObjectType, Field, ID } from 'type-graphql';
 import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+
+import { IsUsername } from '../validators/isUsername';
 import { Habit } from './habit';
 
 @Entity()
@@ -19,6 +21,7 @@ export class User {
   @Field()
   @Column({ unique: true })
   @Length(3, 32)
+  @IsUsername()
   username: string;
 
   @Column()
