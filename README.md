@@ -20,5 +20,4 @@
 ## TODOS
 
 - Error Handling
-- Input Validation
 - Business Logic

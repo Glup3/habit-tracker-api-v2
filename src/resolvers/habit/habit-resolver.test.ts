@@ -1,9 +1,16 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { Connection, Repository } from 'typeorm';
-import faker from 'faker';
 
 import { testConnection } from '../../test_utils/test-database';
 import { gCall } from '../../test_utils/gCall';
+import {
+  generateDate,
+  generateDescription,
+  generateEmail,
+  generateName,
+  generatePassword,
+  generateTitle
+} from '../../test_utils/data-generator';
 import { User } from '../../entities/user';
 import { Habit } from '../../entities/habit';
 
@@ -76,36 +83,33 @@ interface RemoveHabitMutationResult {
 }
 
 describe('Habit Resolver', () => {
-  test('if adding multiple habits to the logged in user works properly', async () => {
-    const user = {
-      email: faker.internet.email(),
-      password: faker.internet.password(),
-      username: faker.internet.userName(),
-      firstname: faker.name.firstName(),
-      lastname: faker.name.lastName()
-    };
+  test('if adding multiple habits to the user then return the same habits', async () => {
     const habit1 = {
-      title: faker.commerce.productName(),
-      description: faker.commerce.productDescription(),
-      startDate: faker.date.recent().toISOString()
+      title: generateTitle(),
+      description: generateDescription(),
+      startDate: generateDate().toISOString()
     };
     const habit2 = {
-      title: faker.commerce.productName(),
-      description: faker.commerce.productDescription(),
-      startDate: faker.date.soon().toISOString()
+      title: generateTitle(),
+      description: generateDescription(),
+      startDate: generateDate().toISOString()
     };
     const habit3 = {
-      title: faker.commerce.productName(),
-      description: faker.commerce.productDescription(),
-      startDate: faker.date.recent().toISOString()
+      title: generateTitle(),
+      description: generateDescription(),
+      startDate: generateDate().toISOString()
     };
 
-    const newUser = userRepository.create({
-      ...user,
+    const user = userRepository.create({
+      email: generateEmail(),
+      password: generatePassword(),
+      username: generateName(),
+      firstname: generateName(),
+      lastname: generateName(),
       habits: []
     });
+    userRepository.save(user);
 
-    userRepository.save(newUser);
     await gCall({
       source: addHabitMutation,
       variableValues: { data: habit1 },
@@ -124,30 +128,33 @@ describe('Habit Resolver', () => {
 
     const dbUser = await userRepository.findOne({ where: { username: user.username }, relations: ['habits'] });
     const habits = await habitRepository.find({ where: { user: dbUser } });
+
+    expect(dbUser).toBeDefined();
+    expect(habits).toBeDefined();
     expect(dbUser?.habits.length).toEqual(habits.length);
   });
 
   test('if habit from user by id returns habit', async () => {
     const habit1 = habitRepository.create({
-      title: faker.commerce.productName(),
-      description: faker.commerce.productDescription(),
-      startDate: faker.date.recent().toISOString()
+      title: generateTitle(),
+      description: generateDescription(),
+      startDate: generateDate().toISOString()
     });
     const habit2 = habitRepository.create({
-      title: faker.commerce.productName(),
-      description: faker.commerce.productDescription(),
-      startDate: faker.date.recent().toISOString()
+      title: generateTitle(),
+      description: generateDescription(),
+      startDate: generateDate().toISOString()
     });
 
     const h1 = await habitRepository.save(habit1);
     await habitRepository.save(habit2);
 
     const user = userRepository.create({
-      email: faker.internet.email(),
-      password: faker.internet.password(),
-      username: faker.internet.userName(),
-      firstname: faker.name.firstName(),
-      lastname: faker.name.lastName(),
+      email: generateEmail(),
+      password: generatePassword(),
+      username: generateName(),
+      firstname: generateName(),
+      lastname: generateName(),
       habits: [habit1, habit2]
     });
     await userRepository.save(user);
@@ -171,29 +178,29 @@ describe('Habit Resolver', () => {
 
   test('if getting habits from user works properly', async () => {
     const habit1 = habitRepository.create({
-      title: faker.commerce.productName(),
-      description: faker.commerce.productDescription(),
-      startDate: faker.date.recent().toISOString()
+      title: generateTitle(),
+      description: generateDescription(),
+      startDate: generateDate().toISOString()
     });
     const habit2 = habitRepository.create({
-      title: faker.commerce.productName(),
-      description: faker.commerce.productDescription(),
-      startDate: faker.date.recent().toISOString()
+      title: generateTitle(),
+      description: generateDescription(),
+      startDate: generateDate().toISOString()
     });
     const habit3 = habitRepository.create({
-      title: faker.commerce.productName(),
-      description: faker.commerce.productDescription(),
-      startDate: faker.date.recent().toISOString()
+      title: generateTitle(),
+      description: generateDescription(),
+      startDate: generateDate().toISOString()
     });
     const habit4 = habitRepository.create({
-      title: faker.commerce.productName(),
-      description: faker.commerce.productDescription(),
-      startDate: faker.date.recent().toISOString()
+      title: generateTitle(),
+      description: generateDescription(),
+      startDate: generateDate().toISOString()
     });
     const habit5 = habitRepository.create({
-      title: faker.commerce.productName(),
-      description: faker.commerce.productDescription(),
-      startDate: faker.date.recent().toISOString()
+      title: generateTitle(),
+      description: generateDescription(),
+      startDate: generateDate().toISOString()
     });
 
     await habitRepository.save(habit1);
@@ -203,19 +210,19 @@ describe('Habit Resolver', () => {
     await habitRepository.save(habit5);
 
     const user1 = userRepository.create({
-      email: faker.internet.email(),
-      password: faker.internet.password(),
-      username: faker.internet.userName(),
-      firstname: faker.name.firstName(),
-      lastname: faker.name.lastName(),
+      email: generateEmail(),
+      password: generatePassword(),
+      username: generateName(),
+      firstname: generateName(),
+      lastname: generateName(),
       habits: [habit1, habit2, habit4, habit5]
     });
     const user2 = userRepository.create({
-      email: faker.internet.email(),
-      password: faker.internet.password(),
-      username: faker.internet.userName(),
-      firstname: faker.name.firstName(),
-      lastname: faker.name.lastName(),
+      email: generateEmail(),
+      password: generatePassword(),
+      username: generateName(),
+      firstname: generateName(),
+      lastname: generateName(),
       habits: [habit3]
     });
     await userRepository.save(user1);
@@ -232,30 +239,30 @@ describe('Habit Resolver', () => {
 
   test('if user removes its own habit then it should succeed', async () => {
     const habit1 = habitRepository.create({
-      title: faker.commerce.productName(),
-      description: faker.commerce.productDescription(),
-      startDate: faker.date.recent().toISOString()
+      title: generateTitle(),
+      description: generateDescription(),
+      startDate: generateDate().toISOString()
     });
     const habit2 = habitRepository.create({
-      title: faker.commerce.productName(),
-      description: faker.commerce.productDescription(),
-      startDate: faker.date.recent().toISOString()
+      title: generateTitle(),
+      description: generateDescription(),
+      startDate: generateDate().toISOString()
     });
     const habit3 = habitRepository.create({
-      title: faker.commerce.productName(),
-      description: faker.commerce.productDescription(),
-      startDate: faker.date.recent().toISOString()
+      title: generateTitle(),
+      description: generateDescription(),
+      startDate: generateDate().toISOString()
     });
     await habitRepository.save(habit1);
     const savedHabit2 = await habitRepository.save(habit2);
     await habitRepository.save(habit3);
 
     const user = userRepository.create({
-      email: faker.internet.email(),
-      password: faker.internet.password(),
-      username: faker.internet.userName(),
-      firstname: faker.name.firstName(),
-      lastname: faker.name.lastName(),
+      email: generateEmail(),
+      password: generatePassword(),
+      username: generateName(),
+      firstname: generateName(),
+      lastname: generateName(),
       habits: [habit1, habit2, habit3]
     });
     await userRepository.save(user);
@@ -273,24 +280,24 @@ describe('Habit Resolver', () => {
     expect.assertions(3);
 
     const habit1 = habitRepository.create({
-      title: faker.commerce.productName(),
-      description: faker.commerce.productDescription(),
-      startDate: faker.date.recent().toISOString()
+      title: generateTitle(),
+      description: generateDescription(),
+      startDate: generateDate().toISOString()
     });
     const habit2 = habitRepository.create({
-      title: faker.commerce.productName(),
-      description: faker.commerce.productDescription(),
-      startDate: faker.date.recent().toISOString()
+      title: generateTitle(),
+      description: generateDescription(),
+      startDate: generateDate().toISOString()
     });
     await habitRepository.save(habit1);
     const savedHabit2 = await habitRepository.save(habit2);
 
     const user = userRepository.create({
-      email: faker.internet.email(),
-      password: faker.internet.password(),
-      username: faker.internet.userName(),
-      firstname: faker.name.firstName(),
-      lastname: faker.name.lastName(),
+      email: generateEmail(),
+      password: generatePassword(),
+      username: generateName(),
+      firstname: generateName(),
+      lastname: generateName(),
       habits: [habit1]
     });
     await userRepository.save(user);

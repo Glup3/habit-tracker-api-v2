@@ -1,9 +1,9 @@
 import { Connection, Repository } from 'typeorm';
-import faker from 'faker';
 
 import { testConnection } from '../../test_utils/test-database';
 import { gCall } from '../../test_utils/gCall';
 import { User } from '../../entities/user';
+import { generateEmail, generateName, generatePassword, generateUsername } from '../../test_utils/data-generator';
 
 let conn: Connection;
 let userRepository: Repository<User>;
@@ -28,6 +28,10 @@ const registerMutation = `
   }
 `;
 
+interface RegisterMutationResponse {
+  register: User;
+}
+
 const loginMutation = `
   mutation Login($data: LoginInput!) {
     login(data: $data) {
@@ -38,6 +42,10 @@ const loginMutation = `
     }
   }
 `;
+
+interface LoginMutationResponse {
+  login: User;
+}
 
 const meQuery = `
   query Me {
@@ -51,13 +59,15 @@ const meQuery = `
 `;
 
 describe('Auth Resolver', () => {
-  test('if Register with normal args works properly', async () => {
+  test('if registering with good values then return user', async () => {
+    expect.assertions(2);
+
     const user = {
-      email: faker.internet.email(),
-      password: faker.internet.password(),
-      username: faker.internet.userName(),
-      firstname: faker.name.firstName(),
-      lastname: faker.name.lastName()
+      email: generateEmail(),
+      password: generatePassword(),
+      username: generateUsername(),
+      firstname: generateName(),
+      lastname: generateName()
     };
 
     const response = await gCall({
@@ -65,29 +75,116 @@ describe('Auth Resolver', () => {
       variableValues: { data: user }
     });
 
-    expect(response).toMatchObject({
-      data: {
-        register: {
-          email: user.email,
-          username: user.username,
-          firstname: user.firstname,
-          lastname: user.lastname
-        }
-      }
+    expect(response.data).toBeDefined();
+    expect((<RegisterMutationResponse>response.data).register.email).toEqual(user.email);
+  });
+
+  test('if registering with a non-email then it should return Argument Validation Error', async () => {
+    expect.assertions(4);
+
+    const user = {
+      email: '',
+      password: generatePassword(),
+      username: generateName(),
+      firstname: generateName(),
+      lastname: generateName()
+    };
+
+    const response = await gCall({
+      source: registerMutation,
+      variableValues: { data: user }
     });
 
-    const dbUser = await userRepository.findOne({ email: user.email });
-    expect(dbUser).toBeDefined();
-    expect(dbUser?.email).toEqual(user.email);
+    expect(response.data).toBeNull();
+    expect(response.errors).toBeDefined();
+    expect(response.errors?.length).toEqual(1);
+    expect(response.errors?.[0].message).toEqual('Argument Validation Error');
+  });
+
+  test('if registering with an already used email then it should return Argument Validation Error', async () => {
+    expect.assertions(4);
+
+    const email = generateEmail();
+
+    const user2 = {
+      email: email,
+      password: generatePassword(),
+      username: generateName(),
+      firstname: generateName(),
+      lastname: generateName()
+    };
+    const user1 = userRepository.create({
+      email: email,
+      password: generatePassword(),
+      username: generateName(),
+      firstname: generateName(),
+      lastname: generateName()
+    });
+    await userRepository.save(user1);
+
+    const response = await gCall({
+      source: registerMutation,
+      variableValues: { data: user2 }
+    });
+
+    expect(response.data).toBeNull();
+    expect(response.errors).toBeDefined();
+    expect(response.errors?.length).toEqual(1);
+    expect(response.errors?.[0].message).toContain('duplicate key value violates unique constraint');
+  });
+
+  test('if registering with a too short password then it should return Argument Validation Error', async () => {
+    expect.assertions(4);
+
+    const user = {
+      email: generateEmail(),
+      password: 'czxcfff',
+      username: generateName(),
+      firstname: generateName(),
+      lastname: generateName()
+    };
+
+    const response = await gCall({
+      source: registerMutation,
+      variableValues: { data: user }
+    });
+
+    expect(response.data).toBeNull();
+    expect(response.errors).toBeDefined();
+    expect(response.errors?.length).toEqual(1);
+    expect(response.errors?.[0].message).toEqual('Argument Validation Error');
+  });
+
+  test('if registering with a too long password then it should return Argument Validation Error', async () => {
+    expect.assertions(4);
+
+    const user = {
+      email: generateEmail(),
+      password: 'bQrd2h2F53p396uttYvYZk3N9YKrZYjn2XwMRAZmTTgDHtqqCS9sfhdeEPe5XbuGJ',
+      username: generateName(),
+      firstname: generateName(),
+      lastname: generateName()
+    };
+
+    const response = await gCall({
+      source: registerMutation,
+      variableValues: { data: user }
+    });
+
+    expect(response.data).toBeNull();
+    expect(response.errors).toBeDefined();
+    expect(response.errors?.length).toEqual(1);
+    expect(response.errors?.[0].message).toEqual('Argument Validation Error');
   });
 
   test('if Login with correct credentials works properly', async () => {
+    expect.assertions(1);
     const user = {
-      email: faker.internet.email(),
-      password: faker.internet.password(),
-      username: faker.internet.userName(),
-      firstname: faker.name.firstName(),
-      lastname: faker.name.lastName()
+      email: generateEmail(),
+      password: generatePassword(),
+      username: generateName(),
+      firstname: generateName(),
+      lastname: generateName()
     };
 
     await gCall({
@@ -105,25 +202,16 @@ describe('Auth Resolver', () => {
       }
     });
 
-    expect(response).toMatchObject({
-      data: {
-        login: {
-          email: user.email,
-          username: user.username,
-          firstname: user.firstname,
-          lastname: user.lastname
-        }
-      }
-    });
+    expect((<LoginMutationResponse>response.data).login.email).toEqual(user.email);
   });
 
   test('if Me with user works properly', async () => {
     const user = userRepository.create({
-      email: faker.internet.email(),
-      password: faker.internet.password(),
-      username: faker.internet.userName(),
-      firstname: faker.name.firstName(),
-      lastname: faker.name.lastName(),
+      email: generateEmail(),
+      password: generatePassword(),
+      username: generateName(),
+      firstname: generateName(),
+      lastname: generateName(),
       habits: []
     });
     await userRepository.save(user);
