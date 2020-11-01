@@ -37,3 +37,10 @@ export class UpdateMeInput implements Partial<User> {
   @IsAlpha()
   lastname?: string;
 }
+
+@InputType()
+export class DeleteMyAccountInput implements Partial<User> {
+  @Field()
+  @Length(8, 64)
+  password: string;
+}

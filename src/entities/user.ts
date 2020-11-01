@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { IsAlpha, IsAlphanumeric, IsEmail, Length } from 'class-validator';
+import { IsAlpha, IsEmail, Length } from 'class-validator';
 import { ObjectType, Field, ID } from 'type-graphql';
 import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 

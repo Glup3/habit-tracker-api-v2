@@ -4,6 +4,7 @@ import { testConnection } from '../../test_utils/test-database';
 import { gCall } from '../../test_utils/gCall';
 import { User } from '../../entities/user';
 import { generateEmail, generateName, generatePassword, generateUsername } from '../../test_utils/data-generator';
+import { DeleteMyAccountPayload } from './user-types';
 
 let conn: Connection;
 let userRepository: Repository<User>;
@@ -66,6 +67,21 @@ const updateMeMutation = `
 `;
 interface UpdateMeMutationResponse {
   updateMe: User;
+}
+
+const deleteMyAccountMutation = `
+  mutation DeleteMyAccount($data: DeleteMyAccountInput!) {
+    deleteMyAccount(data: $data) {
+      user {
+        id
+        username
+        email
+      }
+    }
+  }
+`;
+interface DeleteMyAccountMutationResponse {
+  deleteMyAccount: DeleteMyAccountPayload;
 }
 
 describe('User Resolver', () => {
@@ -705,13 +721,126 @@ describe('User Resolver', () => {
     expect(response.errors?.[0].message).toContain('User is not logged in');
   });
 
-  test('if update user on not existing/different user with valid firstname and valid lastname then it should return error "Could not find any entity of type"', async () => {
+  test('if update user on not existing user with valid firstname and valid lastname then it should return error "Could not find any entity of type"', async () => {
     expect.assertions(4);
 
     const response = await gCall({
       source: updateMeMutation,
       username: 'userdoesntexist',
       variableValues: { data: { firstname: 'Max', lastname: 'Mustermann' } }
+    });
+
+    expect(response.data).toBeNull();
+    expect(response.errors).not.toBeNull();
+    expect(response.errors?.length).toEqual(1);
+    expect(response.errors?.[0].message).toContain('Could not find any entity of type');
+  });
+
+  test('if delete user with correct password then it should return deleted user', async () => {
+    expect.assertions(2);
+
+    const user = {
+      email: 'super@cool.email',
+      password: generatePassword(),
+      username: 'best_username3',
+      firstname: generateName(),
+      lastname: generateName()
+    };
+
+    await gCall({
+      source: registerMutation,
+      variableValues: { data: user }
+    });
+
+    const response = await gCall({
+      source: deleteMyAccountMutation,
+      username: user.username,
+      variableValues: { data: { password: user.password } }
+    });
+
+    expect(response.data).not.toBeNull();
+    expect((<DeleteMyAccountMutationResponse>response.data).deleteMyAccount.user.username).toEqual(user.username);
+  });
+
+  test('if delete user with incorrect password then it should return Error "Password is incorrect"', async () => {
+    expect.assertions(4);
+
+    const user = {
+      email: generateEmail(),
+      password: generatePassword(),
+      username: generateUsername(),
+      firstname: generateName(),
+      lastname: generateName()
+    };
+
+    await gCall({
+      source: registerMutation,
+      variableValues: { data: user }
+    });
+
+    const response = await gCall({
+      source: deleteMyAccountMutation,
+      username: user.username,
+      variableValues: { data: { password: 'randomPassword' } }
+    });
+
+    expect(response.data).toBeNull();
+    expect(response.errors).not.toBeNull();
+    expect(response.errors?.length).toEqual(1);
+    expect(response.errors?.[0].message).toEqual('Password is incorrect');
+  });
+
+  test('if delete user with too short password then it should return Argument Validation Error', async () => {
+    expect.assertions(4);
+
+    const response = await gCall({
+      source: deleteMyAccountMutation,
+      username: 'user1',
+      variableValues: { data: { password: 'onechar' } }
+    });
+
+    expect(response.data).toBeNull();
+    expect(response.errors).not.toBeNull();
+    expect(response.errors?.length).toEqual(1);
+    expect(response.errors?.[0].message).toEqual('Argument Validation Error');
+  });
+
+  test('if delete user with too long password then it should return Argument Validation Error', async () => {
+    expect.assertions(4);
+
+    const response = await gCall({
+      source: deleteMyAccountMutation,
+      username: 'user1',
+      variableValues: { data: { password: 'bQrd2h2F53p396uttYvYZk3N9YKrZYjn2XwMRAZmTTgDHtqqCS9sfhdeEPe5XbuGJ' } }
+    });
+
+    expect(response.data).toBeNull();
+    expect(response.errors).not.toBeNull();
+    expect(response.errors?.length).toEqual(1);
+    expect(response.errors?.[0].message).toEqual('Argument Validation Error');
+  });
+
+  test('if delete user on not logged in user with random password then it should return error "User is not logged in"', async () => {
+    expect.assertions(4);
+
+    const response = await gCall({
+      source: deleteMyAccountMutation,
+      variableValues: { data: { password: 'randomPW312' } }
+    });
+
+    expect(response.data).toBeNull();
+    expect(response.errors).not.toBeNull();
+    expect(response.errors?.length).toEqual(1);
+    expect(response.errors?.[0].message).toContain('User is not logged in');
+  });
+
+  test('if delete user on not existing user with random password then it should return error "Could not find any entity of type"', async () => {
+    expect.assertions(4);
+
+    const response = await gCall({
+      source: deleteMyAccountMutation,
+      username: 'userdoesntexist',
+      variableValues: { data: { password: 'randomPw322' } }
     });
 
     expect(response.data).toBeNull();

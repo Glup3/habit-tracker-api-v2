@@ -6,9 +6,16 @@ import bcrypt from 'bcryptjs';
 import { User } from '../../entities/user';
 import { Authenticated } from '../../middlewares/authenticated';
 import { Context } from '../../types/context.interface';
-import { UpdateEmailInput, UpdateMeInput, UpdatePasswordInput, UpdateUsernameInput } from './user-input';
+import {
+  UpdateEmailInput,
+  UpdateMeInput,
+  UpdatePasswordInput,
+  UpdateUsernameInput,
+  DeleteMyAccountInput
+} from './user-input';
 import { invalidateTokens } from '../../auth';
 import { COOKIE_ACCESS_TOKEN, COOKIE_REFRESH_TOKEN } from '../../constants';
+import { DeleteMyAccountPayload } from './user-types';
 
 @Resolver(User)
 export class UserResolver {
@@ -95,13 +102,23 @@ export class UserResolver {
     return user;
   }
 
-  @Mutation(() => Boolean)
-  async removeUser(@Arg('id') id: number): Promise<boolean> {
-    try {
-      await this.userRepository.delete(id);
-      return true;
-    } catch {
-      return false;
+  @Mutation(() => DeleteMyAccountPayload)
+  @UseMiddleware(Authenticated)
+  async deleteMyAccount(@Arg('data') data: DeleteMyAccountInput, @Ctx() ctx: Context): Promise<DeleteMyAccountPayload> {
+    const user = await this.userRepository.findOneOrFail({ username: ctx.req.username });
+    const isPasswordValid = await bcrypt.compare(data.password, user.password);
+    const userId = user.id;
+
+    if (!isPasswordValid) {
+      throw new Error('Password is incorrect');
     }
+
+    const deletedUser = await this.userRepository.remove(user);
+    deletedUser.id = userId;
+
+    ctx.res.cookie(COOKIE_REFRESH_TOKEN, { maxAge: 0 });
+    ctx.res.cookie(COOKIE_ACCESS_TOKEN, { maxAge: 0 });
+
+    return { user: deletedUser };
   }
 }
