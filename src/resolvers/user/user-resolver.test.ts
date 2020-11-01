@@ -46,6 +46,15 @@ interface UpdateEmailMutationResponse {
   updateEmail: boolean;
 }
 
+const updateUsernameMutation = `
+  mutation UpdateUsername($data: UpdateUsernameInput!) {
+    updateUsername(data: $data)
+  }
+`;
+interface UpdateUsernameMutationResponse {
+  updateUsername: boolean;
+}
+
 describe('User Resolver', () => {
   test('if update password with a valid password then it should return true', async () => {
     expect.assertions(2);
@@ -132,21 +141,17 @@ describe('User Resolver', () => {
     expect(response.errors?.[0].message).toContain('Could not find any entity of type');
   });
 
-  test('if update email with an valid and new email then it should return true', async () => {
+  test('if update email with a valid and new email then it should return true', async () => {
     expect.assertions(2);
 
-    const user = {
+    const user = userRepository.create({
       email: 'insane@custom.email',
       password: generatePassword(),
       username: generateUsername(),
       firstname: generateName(),
       lastname: generateName()
-    };
-
-    await gCall({
-      source: registerMutation,
-      variableValues: { data: user }
     });
+    await userRepository.save(user);
 
     const response = await gCall({
       source: updateEmailMutation,
@@ -209,5 +214,160 @@ describe('User Resolver', () => {
 
     expect(response.data).not.toBeNull();
     expect((<UpdateEmailMutationResponse>response.data).updateEmail).toBeFalsy();
+  });
+
+  test('if update email on not logged in user then it should return error "User is not logged in"', async () => {
+    expect.assertions(4);
+
+    const response = await gCall({
+      source: updateEmailMutation,
+      variableValues: { data: { email: 'creative@new.email' } }
+    });
+
+    expect(response.data).toBeNull();
+    expect(response.errors).not.toBeNull();
+    expect(response.errors?.length).toEqual(1);
+    expect(response.errors?.[0].message).toContain('User is not logged in');
+  });
+
+  test('if update email on not existing/different user then it should return error "Could not find any entity of type"', async () => {
+    expect.assertions(4);
+
+    const response = await gCall({
+      source: updateEmailMutation,
+      username: 'userdoesntexist',
+      variableValues: { data: { email: 'my@new.email' } }
+    });
+
+    expect(response.data).toBeNull();
+    expect(response.errors).not.toBeNull();
+    expect(response.errors?.length).toEqual(1);
+    expect(response.errors?.[0].message).toContain('Could not find any entity of type');
+  });
+
+  test('if update username with a valid username then it should return true', async () => {
+    expect.assertions(2);
+
+    const user = userRepository.create({
+      email: generateEmail(),
+      password: generatePassword(),
+      username: 'thecoolest_username132',
+      firstname: generateName(),
+      lastname: generateName()
+    });
+    await userRepository.save(user);
+
+    const response = await gCall({
+      source: updateUsernameMutation,
+      username: user.username,
+      variableValues: { data: { username: 'cool_new_username1' } }
+    });
+
+    expect(response.data).not.toBeNull();
+    expect((<UpdateUsernameMutationResponse>response.data).updateUsername).toBeTruthy();
+  });
+
+  test('if update username with a too short username then it should return Argument Validation Error', async () => {
+    expect.assertions(4);
+
+    const response = await gCall({
+      source: updateUsernameMutation,
+      username: 'random_user1',
+      variableValues: { data: { username: 'ff' } }
+    });
+
+    expect(response.data).toBeNull();
+    expect(response.errors).not.toBeNull();
+    expect(response.errors?.length).toEqual(1);
+    expect(response.errors?.[0].message).toContain('Argument Validation Error');
+  });
+
+  test('if update username with a too long username then it should return Argument Validation Error', async () => {
+    expect.assertions(4);
+
+    const response = await gCall({
+      source: updateUsernameMutation,
+      username: 'random_user1',
+      variableValues: { data: { username: 'NBBWnW96sf22nVqHvZvXapJQrzsFUFdwb' } }
+    });
+
+    expect(response.data).toBeNull();
+    expect(response.errors).not.toBeNull();
+    expect(response.errors?.length).toEqual(1);
+    expect(response.errors?.[0].message).toContain('Argument Validation Error');
+  });
+
+  test('if update username with an empty username then it should return Argument Validation Error', async () => {
+    expect.assertions(4);
+
+    const response = await gCall({
+      source: updateUsernameMutation,
+      username: 'random_user1',
+      variableValues: { data: { username: '' } }
+    });
+
+    expect(response.data).toBeNull();
+    expect(response.errors).not.toBeNull();
+    expect(response.errors?.length).toEqual(1);
+    expect(response.errors?.[0].message).toContain('Argument Validation Error');
+  });
+
+  test('if update username with an invalid username (special chars) then it should return Argument Validation Error', async () => {
+    expect.assertions(4);
+
+    const response = await gCall({
+      source: updateUsernameMutation,
+      username: 'random_user1',
+      variableValues: { data: { username: 'username][31-' } }
+    });
+
+    expect(response.data).toBeNull();
+    expect(response.errors).not.toBeNull();
+    expect(response.errors?.length).toEqual(1);
+    expect(response.errors?.[0].message).toContain('Argument Validation Error');
+  });
+
+  test('if update username with an invalid username (doesnt start with a char) then it should return Argument Validation Error', async () => {
+    expect.assertions(4);
+
+    const response = await gCall({
+      source: updateUsernameMutation,
+      username: 'random_user1',
+      variableValues: { data: { username: '323_userfname' } }
+    });
+
+    expect(response.data).toBeNull();
+    expect(response.errors).not.toBeNull();
+    expect(response.errors?.length).toEqual(1);
+    expect(response.errors?.[0].message).toContain('Argument Validation Error');
+  });
+
+  test('if update username on not logged in user then it should return error "User is not logged in"', async () => {
+    expect.assertions(4);
+
+    const response = await gCall({
+      source: updateUsernameMutation,
+      variableValues: { data: { username: 'newUsername321' } }
+    });
+
+    expect(response.data).toBeNull();
+    expect(response.errors).not.toBeNull();
+    expect(response.errors?.length).toEqual(1);
+    expect(response.errors?.[0].message).toContain('User is not logged in');
+  });
+
+  test('if update password on not existing/different user then it should return error "Could not find any entity of type"', async () => {
+    expect.assertions(4);
+
+    const response = await gCall({
+      source: updateUsernameMutation,
+      username: 'userdoesntexist',
+      variableValues: { data: { username: 'bestUsername312' } }
+    });
+
+    expect(response.data).toBeNull();
+    expect(response.errors).not.toBeNull();
+    expect(response.errors?.length).toEqual(1);
+    expect(response.errors?.[0].message).toContain('Could not find any entity of type');
   });
 });
