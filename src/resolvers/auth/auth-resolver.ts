@@ -35,15 +35,15 @@ export class AuthResolver {
   }
 
   @Mutation(() => User)
-  async login(@Arg('data') data: LoginInput, @Ctx() ctx: Context): Promise<User | null> {
+  async login(@Arg('data') data: LoginInput, @Ctx() ctx: Context): Promise<User> {
     const user = await this.userRepository.findOne({ email: data.email });
     if (!user) {
-      return null;
+      throw new Error('Email or Password is invalid');
     }
 
     const isPasswordValid = await bcrypt.compare(data.password, user.password);
     if (!isPasswordValid) {
-      return null;
+      throw new Error('Email or Password is invalid');
     }
 
     const { accessToken, refreshToken } = createTokens(user);

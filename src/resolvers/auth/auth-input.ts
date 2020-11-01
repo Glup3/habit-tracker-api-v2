@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
-import { IsEmail, Length, MaxLength } from 'class-validator';
+import { IsAlpha, IsEmail, Length } from 'class-validator';
 import { Field, InputType } from 'type-graphql';
 import { User } from '../../entities/user';
 import { IsUsername } from '../../validators/isUsername';
@@ -21,11 +21,13 @@ export class RegisterInput implements Partial<User> {
   username: string;
 
   @Field()
-  @MaxLength(32)
+  @Length(1, 32)
+  @IsAlpha()
   firstname: string;
 
   @Field()
-  @MaxLength(32)
+  @Length(1, 32)
+  @IsAlpha()
   lastname: string;
 }
 

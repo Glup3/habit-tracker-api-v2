@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { IsAlphanumeric, IsEmail, Length, MaxLength } from 'class-validator';
+import { IsAlpha, IsAlphanumeric, IsEmail, Length } from 'class-validator';
 import { ObjectType, Field, ID } from 'type-graphql';
 import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
@@ -30,12 +30,14 @@ export class User {
 
   @Field()
   @Column()
-  @MaxLength(32)
+  @Length(1, 32)
+  @IsAlpha()
   firstname: string;
 
   @Field()
   @Column()
-  @MaxLength(32)
+  @Length(1, 32)
+  @IsAlpha()
   lastname: string;
 
   @Field()
