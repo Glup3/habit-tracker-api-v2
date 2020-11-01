@@ -181,7 +181,7 @@ describe('Auth Resolver', () => {
     expect(response.errors?.[0].message).toEqual('Argument Validation Error');
   });
 
-  test('if registering with a username that has underscores then return user', async () => {
+  test('if registering with an username that has underscores then return user', async () => {
     expect.assertions(2);
 
     const user = {
@@ -245,7 +245,7 @@ describe('Auth Resolver', () => {
     expect(response.errors?.[0].message).toEqual('Argument Validation Error');
   });
 
-  test('if registering with a invalid username (space) then it should return Argument Validation Error', async () => {
+  test('if registering with an invalid username (space) then it should return Argument Validation Error', async () => {
     expect.assertions(4);
 
     const user = {
@@ -267,7 +267,7 @@ describe('Auth Resolver', () => {
     expect(response.errors?.[0].message).toEqual('Argument Validation Error');
   });
 
-  test('if registering with a invalid username (special chars) then it should return Argument Validation Error', async () => {
+  test('if registering with an invalid username (special chars) then it should return Argument Validation Error', async () => {
     expect.assertions(4);
 
     const user = {
@@ -289,7 +289,7 @@ describe('Auth Resolver', () => {
     expect(response.errors?.[0].message).toEqual('Argument Validation Error');
   });
 
-  test('if registering with a invalid username (doesnt start with a char) then it should return Argument Validation Error', async () => {
+  test('if registering with an invalid username (doesnt start with a char) then it should return Argument Validation Error', async () => {
     expect.assertions(4);
 
     const user = {
@@ -355,7 +355,7 @@ describe('Auth Resolver', () => {
     expect(response.errors?.[0].message).toEqual('Argument Validation Error');
   });
 
-  test('if registering with a invalid firstname (numbers) then it should return Argument Validation Error', async () => {
+  test('if registering with an invalid firstname (numbers) then it should return Argument Validation Error', async () => {
     expect.assertions(4);
 
     const user = {
@@ -377,7 +377,7 @@ describe('Auth Resolver', () => {
     expect(response.errors?.[0].message).toEqual('Argument Validation Error');
   });
 
-  test('if registering with a invalid firstname (special chars) then it should return Argument Validation Error', async () => {
+  test('if registering with an invalid firstname (special chars) then it should return Argument Validation Error', async () => {
     expect.assertions(4);
 
     const user = {
@@ -443,7 +443,7 @@ describe('Auth Resolver', () => {
     expect(response.errors?.[0].message).toEqual('Argument Validation Error');
   });
 
-  test('if registering with a invalid lastname (numbers) then it should return Argument Validation Error', async () => {
+  test('if registering with an invalid lastname (numbers) then it should return Argument Validation Error', async () => {
     expect.assertions(4);
 
     const user = {
@@ -465,7 +465,7 @@ describe('Auth Resolver', () => {
     expect(response.errors?.[0].message).toEqual('Argument Validation Error');
   });
 
-  test('if registering with a invalid lastname (special chars) then it should return Argument Validation Error', async () => {
+  test('if registering with an invalid lastname (special chars) then it should return Argument Validation Error', async () => {
     expect.assertions(4);
 
     const user = {

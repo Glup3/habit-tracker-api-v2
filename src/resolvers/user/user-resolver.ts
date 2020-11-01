@@ -6,7 +6,7 @@ import bcrypt from 'bcryptjs';
 import { User } from '../../entities/user';
 import { Authenticated } from '../../middlewares/authenticated';
 import { Context } from '../../types/context.interface';
-import { UpdateEmailInput, UpdatePasswordInput, UpdateUsernameInput } from './user-input';
+import { UpdateEmailInput, UpdateMeInput, UpdatePasswordInput, UpdateUsernameInput } from './user-input';
 import { invalidateTokens } from '../../auth';
 import { COOKIE_ACCESS_TOKEN, COOKIE_REFRESH_TOKEN } from '../../constants';
 
@@ -73,6 +73,26 @@ export class UserResolver {
     ctx.res.cookie(COOKIE_ACCESS_TOKEN, { maxAge: 0 });
 
     return true;
+  }
+
+  @Mutation(() => User)
+  @UseMiddleware(Authenticated)
+  async updateMe(@Arg('data') data: UpdateMeInput, @Ctx() ctx: Context): Promise<User> {
+    const user = await this.userRepository.findOneOrFail({ username: ctx.req.username });
+
+    if (!data.firstname && !data.lastname) {
+      return user;
+    }
+
+    if (data.firstname) {
+      user.firstname = data.firstname;
+    }
+    if (data.lastname) {
+      user.lastname = data.lastname;
+    }
+    await this.userRepository.save(user);
+
+    return user;
   }
 
   @Mutation(() => Boolean)

@@ -1,4 +1,4 @@
-import { IsEmail, Length } from 'class-validator';
+import { IsAlpha, IsEmail, Length } from 'class-validator';
 import { Field, InputType } from 'type-graphql';
 import { User } from '../../entities/user';
 import { IsUsername } from '../../validators/isUsername';
@@ -23,4 +23,17 @@ export class UpdateUsernameInput implements Partial<User> {
   @Length(3, 32)
   @IsUsername()
   username: string;
+}
+
+@InputType()
+export class UpdateMeInput implements Partial<User> {
+  @Field({ nullable: true })
+  @Length(1, 32)
+  @IsAlpha()
+  firstname?: string;
+
+  @Field({ nullable: true })
+  @Length(1, 32)
+  @IsAlpha()
+  lastname?: string;
 }
