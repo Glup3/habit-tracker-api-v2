@@ -67,9 +67,9 @@ describe('Auth Resolver', () => {
     expect.assertions(2);
 
     const user = {
-      email: generateEmail(),
+      email: 'funny@email.com',
       password: generatePassword(),
-      username: generateUsername(),
+      username: generateUsername(8),
       firstname: generateName(),
       lastname: generateName()
     };
@@ -79,7 +79,7 @@ describe('Auth Resolver', () => {
       variableValues: { data: user }
     });
 
-    expect(response.data).toBeDefined();
+    expect(response.data).not.toBeNull();
     expect((<RegisterMutationResponse>response.data).register.email).toEqual(user.email);
   });
 
@@ -100,12 +100,12 @@ describe('Auth Resolver', () => {
     });
 
     expect(response.data).toBeNull();
-    expect(response.errors).toBeDefined();
+    expect(response.errors).not.toBeNull();
     expect(response.errors?.length).toEqual(1);
     expect(response.errors?.[0].message).toEqual('Argument Validation Error');
   });
 
-  test('if registering with an already used email then it should return Argument Validation Error', async () => {
+  test('if registering with an already used email then it should return Error "duplicate key value violates unique constraint"', async () => {
     expect.assertions(4);
 
     const email = generateEmail();
@@ -132,7 +132,7 @@ describe('Auth Resolver', () => {
     });
 
     expect(response.data).toBeNull();
-    expect(response.errors).toBeDefined();
+    expect(response.errors).not.toBeNull();
     expect(response.errors?.length).toEqual(1);
     expect(response.errors?.[0].message).toContain('duplicate key value violates unique constraint');
   });
@@ -154,7 +154,7 @@ describe('Auth Resolver', () => {
     });
 
     expect(response.data).toBeNull();
-    expect(response.errors).toBeDefined();
+    expect(response.errors).not.toBeNull();
     expect(response.errors?.length).toEqual(1);
     expect(response.errors?.[0].message).toEqual('Argument Validation Error');
   });
@@ -176,7 +176,7 @@ describe('Auth Resolver', () => {
     });
 
     expect(response.data).toBeNull();
-    expect(response.errors).toBeDefined();
+    expect(response.errors).not.toBeNull();
     expect(response.errors?.length).toEqual(1);
     expect(response.errors?.[0].message).toEqual('Argument Validation Error');
   });
@@ -197,7 +197,7 @@ describe('Auth Resolver', () => {
       variableValues: { data: user }
     });
 
-    expect(response.data).toBeDefined();
+    expect(response.data).not.toBeNull();
     expect((<RegisterMutationResponse>response.data).register.email).toEqual(user.email);
   });
 
@@ -218,7 +218,7 @@ describe('Auth Resolver', () => {
     });
 
     expect(response.data).toBeNull();
-    expect(response.errors).toBeDefined();
+    expect(response.errors).not.toBeNull();
     expect(response.errors?.length).toEqual(1);
     expect(response.errors?.[0].message).toEqual('Argument Validation Error');
   });
@@ -240,7 +240,7 @@ describe('Auth Resolver', () => {
     });
 
     expect(response.data).toBeNull();
-    expect(response.errors).toBeDefined();
+    expect(response.errors).not.toBeNull();
     expect(response.errors?.length).toEqual(1);
     expect(response.errors?.[0].message).toEqual('Argument Validation Error');
   });
@@ -262,7 +262,7 @@ describe('Auth Resolver', () => {
     });
 
     expect(response.data).toBeNull();
-    expect(response.errors).toBeDefined();
+    expect(response.errors).not.toBeNull();
     expect(response.errors?.length).toEqual(1);
     expect(response.errors?.[0].message).toEqual('Argument Validation Error');
   });
@@ -284,7 +284,7 @@ describe('Auth Resolver', () => {
     });
 
     expect(response.data).toBeNull();
-    expect(response.errors).toBeDefined();
+    expect(response.errors).not.toBeNull();
     expect(response.errors?.length).toEqual(1);
     expect(response.errors?.[0].message).toEqual('Argument Validation Error');
   });
@@ -306,7 +306,7 @@ describe('Auth Resolver', () => {
     });
 
     expect(response.data).toBeNull();
-    expect(response.errors).toBeDefined();
+    expect(response.errors).not.toBeNull();
     expect(response.errors?.length).toEqual(1);
     expect(response.errors?.[0].message).toEqual('Argument Validation Error');
   });
@@ -328,7 +328,7 @@ describe('Auth Resolver', () => {
     });
 
     expect(response.data).toBeNull();
-    expect(response.errors).toBeDefined();
+    expect(response.errors).not.toBeNull();
     expect(response.errors?.length).toEqual(1);
     expect(response.errors?.[0].message).toEqual('Argument Validation Error');
   });
@@ -350,7 +350,7 @@ describe('Auth Resolver', () => {
     });
 
     expect(response.data).toBeNull();
-    expect(response.errors).toBeDefined();
+    expect(response.errors).not.toBeNull();
     expect(response.errors?.length).toEqual(1);
     expect(response.errors?.[0].message).toEqual('Argument Validation Error');
   });
@@ -372,7 +372,7 @@ describe('Auth Resolver', () => {
     });
 
     expect(response.data).toBeNull();
-    expect(response.errors).toBeDefined();
+    expect(response.errors).not.toBeNull();
     expect(response.errors?.length).toEqual(1);
     expect(response.errors?.[0].message).toEqual('Argument Validation Error');
   });
@@ -394,7 +394,7 @@ describe('Auth Resolver', () => {
     });
 
     expect(response.data).toBeNull();
-    expect(response.errors).toBeDefined();
+    expect(response.errors).not.toBeNull();
     expect(response.errors?.length).toEqual(1);
     expect(response.errors?.[0].message).toEqual('Argument Validation Error');
   });
@@ -416,7 +416,7 @@ describe('Auth Resolver', () => {
     });
 
     expect(response.data).toBeNull();
-    expect(response.errors).toBeDefined();
+    expect(response.errors).not.toBeNull();
     expect(response.errors?.length).toEqual(1);
     expect(response.errors?.[0].message).toEqual('Argument Validation Error');
   });
@@ -438,7 +438,7 @@ describe('Auth Resolver', () => {
     });
 
     expect(response.data).toBeNull();
-    expect(response.errors).toBeDefined();
+    expect(response.errors).not.toBeNull();
     expect(response.errors?.length).toEqual(1);
     expect(response.errors?.[0].message).toEqual('Argument Validation Error');
   });
@@ -460,7 +460,7 @@ describe('Auth Resolver', () => {
     });
 
     expect(response.data).toBeNull();
-    expect(response.errors).toBeDefined();
+    expect(response.errors).not.toBeNull();
     expect(response.errors?.length).toEqual(1);
     expect(response.errors?.[0].message).toEqual('Argument Validation Error');
   });
@@ -482,7 +482,7 @@ describe('Auth Resolver', () => {
     });
 
     expect(response.data).toBeNull();
-    expect(response.errors).toBeDefined();
+    expect(response.errors).not.toBeNull();
     expect(response.errors?.length).toEqual(1);
     expect(response.errors?.[0].message).toEqual('Argument Validation Error');
   });
@@ -512,7 +512,7 @@ describe('Auth Resolver', () => {
       }
     });
 
-    expect(response.data).toBeDefined();
+    expect(response.data).not.toBeNull();
     expect((<LoginMutationResponse>response.data).login.email).toEqual(user.email);
   });
 
@@ -542,7 +542,7 @@ describe('Auth Resolver', () => {
     });
 
     expect(response.data).toBeNull();
-    expect(response.errors).toBeDefined();
+    expect(response.errors).not.toBeNull();
     expect(response.errors?.length).toEqual(1);
     expect(response.errors?.[0].message).toEqual('Email or Password is invalid');
   });
@@ -561,7 +561,7 @@ describe('Auth Resolver', () => {
     });
 
     expect(response.data).toBeNull();
-    expect(response.errors).toBeDefined();
+    expect(response.errors).not.toBeNull();
     expect(response.errors?.length).toEqual(1);
     expect(response.errors?.[0].message).toEqual('Argument Validation Error');
   });
@@ -592,7 +592,7 @@ describe('Auth Resolver', () => {
     });
 
     expect(response.data).toBeNull();
-    expect(response.errors).toBeDefined();
+    expect(response.errors).not.toBeNull();
     expect(response.errors?.length).toEqual(1);
     expect(response.errors?.[0].message).toEqual('Email or Password is invalid');
   });
@@ -611,7 +611,7 @@ describe('Auth Resolver', () => {
     });
 
     expect(response.data).toBeNull();
-    expect(response.errors).toBeDefined();
+    expect(response.errors).not.toBeNull();
     expect(response.errors?.length).toEqual(1);
     expect(response.errors?.[0].message).toEqual('Argument Validation Error');
   });
@@ -630,7 +630,7 @@ describe('Auth Resolver', () => {
     });
 
     expect(response.data).toBeNull();
-    expect(response.errors).toBeDefined();
+    expect(response.errors).not.toBeNull();
     expect(response.errors?.length).toEqual(1);
     expect(response.errors?.[0].message).toEqual('Argument Validation Error');
   });
@@ -652,7 +652,7 @@ describe('Auth Resolver', () => {
       username: user.username
     });
 
-    expect(response.data).toBeDefined();
+    expect(response.data).not.toBeNull();
     expect((<MeQueryResponse>response.data).me.username).toEqual(user.username);
   });
 
@@ -662,7 +662,7 @@ describe('Auth Resolver', () => {
     });
 
     expect(response.data).toBeNull();
-    expect(response.errors).toBeDefined();
+    expect(response.errors).not.toBeNull();
     expect(response.errors?.length).toEqual(1);
     expect(response.errors?.[0].message).toEqual('User is not logged in');
   });

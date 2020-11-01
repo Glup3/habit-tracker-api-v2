@@ -10,7 +10,7 @@ export const generateName = (length = 16): string =>
 
 export const generatePassword = (length = 16): string => chance.string({ length });
 
-export const generateEmail = (): string => chance.email();
+export const generateEmail = (): string => `${generateName(16)}@${generateName(6)}.com`;
 
 export const generateDate = (): Date => chance.date();
 

@@ -129,8 +129,8 @@ describe('Habit Resolver', () => {
     const dbUser = await userRepository.findOne({ where: { username: user.username }, relations: ['habits'] });
     const habits = await habitRepository.find({ where: { user: dbUser } });
 
-    expect(dbUser).toBeDefined();
-    expect(habits).toBeDefined();
+    expect(dbUser).not.toBeNull();
+    expect(habits).not.toBeNull();
     expect(dbUser?.habits.length).toEqual(habits.length);
   });
 
