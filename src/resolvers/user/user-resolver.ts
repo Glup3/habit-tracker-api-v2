@@ -6,7 +6,7 @@ import bcrypt from 'bcryptjs';
 import { User } from '../../entities/user';
 import { Authenticated } from '../../middlewares/authenticated';
 import { Context } from '../../types/context.interface';
-import { UpdatePasswordInput } from './user-input';
+import { UpdateEmailInput, UpdatePasswordInput } from './user-input';
 import { invalidateTokens } from '../../auth';
 import { COOKIE_ACCESS_TOKEN, COOKIE_REFRESH_TOKEN } from '../../constants';
 
@@ -25,6 +25,26 @@ export class UserResolver {
     const user = await this.userRepository.findOneOrFail({ username: ctx.req.username });
     const hashedPassword = await bcrypt.hash(data.password, 10);
     user.password = hashedPassword;
+
+    await this.userRepository.save(user);
+
+    await invalidateTokens(ctx.req.username);
+    ctx.res.cookie(COOKIE_REFRESH_TOKEN, { maxAge: 0 });
+    ctx.res.cookie(COOKIE_ACCESS_TOKEN, { maxAge: 0 });
+
+    return true;
+  }
+
+  @Mutation(() => Boolean)
+  @UseMiddleware(Authenticated)
+  async updateEmail(@Arg('data') data: UpdateEmailInput, @Ctx() ctx: Context): Promise<boolean> {
+    const usedEmailUser = await this.userRepository.findOne({ email: data.email });
+    if (usedEmailUser) {
+      return false;
+    }
+
+    const user = await this.userRepository.findOneOrFail({ username: ctx.req.username });
+    user.email = data.email;
 
     await this.userRepository.save(user);
 

@@ -37,6 +37,15 @@ const registerMutation = `
   }
 `;
 
+const updateEmailMutation = `
+  mutation UpdateEmail($data: UpdateEmailInput!) {
+    updateEmail(data: $data)
+  }
+`;
+interface UpdateEmailMutationResponse {
+  updateEmail: boolean;
+}
+
 describe('User Resolver', () => {
   test('if update password with a valid password then it should return true', async () => {
     expect.assertions(2);
@@ -108,7 +117,7 @@ describe('User Resolver', () => {
     expect(response.errors?.[0].message).toContain('User is not logged in');
   });
 
-  test('if update password on not existing/different user then it should return error " ..."', async () => {
+  test('if update password on not existing/different user then it should return error "Could not find any entity of type"', async () => {
     expect.assertions(4);
 
     const response = await gCall({
@@ -121,5 +130,84 @@ describe('User Resolver', () => {
     expect(response.errors).not.toBeNull();
     expect(response.errors?.length).toEqual(1);
     expect(response.errors?.[0].message).toContain('Could not find any entity of type');
+  });
+
+  test('if update email with an valid and new email then it should return true', async () => {
+    expect.assertions(2);
+
+    const user = {
+      email: 'insane@custom.email',
+      password: generatePassword(),
+      username: generateUsername(),
+      firstname: generateName(),
+      lastname: generateName()
+    };
+
+    await gCall({
+      source: registerMutation,
+      variableValues: { data: user }
+    });
+
+    const response = await gCall({
+      source: updateEmailMutation,
+      username: user.username,
+      variableValues: { data: { email: 'mynew@email.com' } }
+    });
+
+    expect(response.data).not.toBeNull();
+    expect((<UpdateEmailMutationResponse>response.data).updateEmail).toBeTruthy();
+  });
+
+  test('if update email with an invalid email then it should return Argument Validation Error', async () => {
+    expect.assertions(4);
+
+    const response = await gCall({
+      source: updateEmailMutation,
+      username: 'random_user1',
+      variableValues: { data: { email: 'notanemail.com' } }
+    });
+
+    expect(response.data).toBeNull();
+    expect(response.errors).not.toBeNull();
+    expect(response.errors?.length).toEqual(1);
+    expect(response.errors?.[0].message).toContain('Argument Validation Error');
+  });
+
+  test('if update email with no email then it should return Argument Validation Error', async () => {
+    expect.assertions(4);
+
+    const response = await gCall({
+      source: updateEmailMutation,
+      username: 'random_user1',
+      variableValues: { data: { email: '' } }
+    });
+
+    expect(response.data).toBeNull();
+    expect(response.errors).not.toBeNull();
+    expect(response.errors?.length).toEqual(1);
+    expect(response.errors?.[0].message).toContain('Argument Validation Error');
+  });
+
+  test('if update email with an already existing email then it should return false', async () => {
+    expect.assertions(2);
+
+    const user = userRepository.create({
+      email: generateEmail(),
+      password: generatePassword(),
+      username: generateUsername(),
+      firstname: generateName(),
+      lastname: generateName()
+    });
+
+    await userRepository.save(user);
+
+    const response = await gCall({
+      source: updateEmailMutation,
+      username: 'random_user',
+      variableValues: { data: { email: user.email } }
+    });
+
+    expect(response.data).not.toBeNull();
+    expect((<UpdateEmailMutationResponse>response.data).updateEmail).toBeFalsy();
   });
 });
