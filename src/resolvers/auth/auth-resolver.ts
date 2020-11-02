@@ -14,13 +14,14 @@ import {
 } from '../../constants';
 import { Context } from '../../types/context.interface';
 import { Authenticated } from '../../middlewares/authenticated';
+import { LoginPayload, RegisterPayload } from './auth-types';
 
 @Resolver(User)
 export class AuthResolver {
   constructor(@InjectRepository(User) private userRepository: Repository<User>) {}
 
-  @Mutation(() => User)
-  async register(@Arg('data') data: RegisterInput): Promise<User> {
+  @Mutation(() => RegisterPayload)
+  async register(@Arg('data') data: RegisterInput): Promise<RegisterPayload> {
     const hashedPassword = await bcrypt.hash(data.password, 10);
     const user = this.userRepository.create({
       email: data.email,
@@ -31,11 +32,13 @@ export class AuthResolver {
       habits: []
     });
 
-    return await this.userRepository.save(user);
+    return {
+      user: await this.userRepository.save(user)
+    };
   }
 
-  @Mutation(() => User)
-  async login(@Arg('data') data: LoginInput, @Ctx() ctx: Context): Promise<User> {
+  @Mutation(() => LoginPayload)
+  async login(@Arg('data') data: LoginInput, @Ctx() ctx: Context): Promise<LoginPayload> {
     const user = await this.userRepository.findOne({ email: data.email });
     if (!user) {
       throw new Error('Email or Password is invalid');
@@ -51,13 +54,13 @@ export class AuthResolver {
     ctx.res.cookie(COOKIE_REFRESH_TOKEN, refreshToken, { maxAge: 1000 * REFRESH_TOKEN_EXPIRE_TIME, httpOnly: true });
     ctx.res.cookie(COOKIE_ACCESS_TOKEN, accessToken, { maxAge: 1000 * ACCESS_TOKEN_EXPIRE_TIME });
 
-    return user;
+    return { user };
   }
 
   @Query(() => User)
   @UseMiddleware(Authenticated)
-  me(@Ctx() ctx: Context): Promise<User | undefined> {
-    return this.userRepository.findOne({ where: { username: ctx.req.username }, relations: ['habits'] });
+  me(@Ctx() ctx: Context): Promise<User> {
+    return this.userRepository.findOneOrFail({ where: { username: ctx.req.username }, relations: ['habits'] });
   }
 
   @Mutation(() => Boolean)

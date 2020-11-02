@@ -15,7 +15,13 @@ import {
 } from './user-input';
 import { invalidateTokens } from '../../auth';
 import { COOKIE_ACCESS_TOKEN, COOKIE_REFRESH_TOKEN } from '../../constants';
-import { DeleteMyAccountPayload } from './user-types';
+import {
+  DeleteMyAccountPayload,
+  UpdateEmailPayload,
+  UpdateMePayload,
+  UpdatePasswordPayload,
+  UpdateUsernamePayload
+} from './user-types';
 
 @Resolver(User)
 export class UserResolver {
@@ -26,9 +32,9 @@ export class UserResolver {
     return this.userRepository.find({ relations: ['habits'] });
   }
 
-  @Mutation(() => Boolean)
+  @Mutation(() => UpdatePasswordPayload)
   @UseMiddleware(Authenticated)
-  async updatePassword(@Arg('data') data: UpdatePasswordInput, @Ctx() ctx: Context): Promise<boolean> {
+  async updatePassword(@Arg('data') data: UpdatePasswordInput, @Ctx() ctx: Context): Promise<UpdatePasswordPayload> {
     const user = await this.userRepository.findOneOrFail({ username: ctx.req.username });
     const hashedPassword = await bcrypt.hash(data.password, 10);
     user.password = hashedPassword;
@@ -39,15 +45,15 @@ export class UserResolver {
     ctx.res.cookie(COOKIE_REFRESH_TOKEN, { maxAge: 0 });
     ctx.res.cookie(COOKIE_ACCESS_TOKEN, { maxAge: 0 });
 
-    return true;
+    return { success: true };
   }
 
-  @Mutation(() => Boolean)
+  @Mutation(() => UpdateEmailPayload)
   @UseMiddleware(Authenticated)
-  async updateEmail(@Arg('data') data: UpdateEmailInput, @Ctx() ctx: Context): Promise<boolean> {
+  async updateEmail(@Arg('data') data: UpdateEmailInput, @Ctx() ctx: Context): Promise<UpdateEmailPayload> {
     const usedEmailUser = await this.userRepository.findOne({ email: data.email });
     if (usedEmailUser) {
-      return false;
+      return { success: false };
     }
 
     const user = await this.userRepository.findOneOrFail({ username: ctx.req.username });
@@ -59,15 +65,15 @@ export class UserResolver {
     ctx.res.cookie(COOKIE_REFRESH_TOKEN, { maxAge: 0 });
     ctx.res.cookie(COOKIE_ACCESS_TOKEN, { maxAge: 0 });
 
-    return true;
+    return { success: true };
   }
 
-  @Mutation(() => Boolean)
+  @Mutation(() => UpdateUsernamePayload)
   @UseMiddleware(Authenticated)
-  async updateUsername(@Arg('data') data: UpdateUsernameInput, @Ctx() ctx: Context): Promise<boolean> {
+  async updateUsername(@Arg('data') data: UpdateUsernameInput, @Ctx() ctx: Context): Promise<UpdateUsernamePayload> {
     const usedUsernameUser = await this.userRepository.findOne({ username: data.username });
     if (usedUsernameUser) {
-      return false;
+      return { success: false };
     }
 
     const user = await this.userRepository.findOneOrFail({ username: ctx.req.username });
@@ -79,16 +85,16 @@ export class UserResolver {
     ctx.res.cookie(COOKIE_REFRESH_TOKEN, { maxAge: 0 });
     ctx.res.cookie(COOKIE_ACCESS_TOKEN, { maxAge: 0 });
 
-    return true;
+    return { success: true };
   }
 
-  @Mutation(() => User)
+  @Mutation(() => UpdateMePayload)
   @UseMiddleware(Authenticated)
-  async updateMe(@Arg('data') data: UpdateMeInput, @Ctx() ctx: Context): Promise<User> {
+  async updateMe(@Arg('data') data: UpdateMeInput, @Ctx() ctx: Context): Promise<UpdateMePayload> {
     const user = await this.userRepository.findOneOrFail({ username: ctx.req.username });
 
     if (!data.firstname && !data.lastname) {
-      return user;
+      return { user };
     }
 
     if (data.firstname) {
@@ -99,7 +105,7 @@ export class UserResolver {
     }
     await this.userRepository.save(user);
 
-    return user;
+    return { user };
   }
 
   @Mutation(() => DeleteMyAccountPayload)

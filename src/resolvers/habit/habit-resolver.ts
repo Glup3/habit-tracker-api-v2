@@ -6,7 +6,8 @@ import { User } from '../../entities/user';
 import { Authenticated } from '../../middlewares/authenticated';
 import { HabitOwner } from '../../middlewares/habitOwner';
 import { Context } from '../../types/context.interface';
-import { AddHabitInput } from './habit-input';
+import { AddHabitInput, HabitInput, RemoveHabitInput } from './habit-input';
+import { AddHabitPayload, RemoveHabitPayload } from './habit-types';
 
 @Resolver(Habit)
 export class HabitResolver {
@@ -24,13 +25,13 @@ export class HabitResolver {
 
   @Query(() => Habit)
   @UseMiddleware(Authenticated, HabitOwner)
-  habit(@Arg('id', () => Int) id: number): Promise<Habit> {
-    return this.habitRepository.findOneOrFail(id, { relations: ['entries'] });
+  habit(@Arg('data') data: HabitInput): Promise<Habit> {
+    return this.habitRepository.findOneOrFail({ where: { id: data.id }, relations: ['entries'] });
   }
 
-  @Mutation(() => Habit)
+  @Mutation(() => AddHabitPayload)
   @UseMiddleware(Authenticated)
-  async addHabit(@Arg('data') data: AddHabitInput, @Ctx() ctx: Context): Promise<Habit> {
+  async addHabit(@Arg('data') data: AddHabitInput, @Ctx() ctx: Context): Promise<AddHabitPayload> {
     const user = await this.userRepository.findOneOrFail({ username: ctx.req.username });
 
     const habit = this.habitRepository.create({
@@ -41,16 +42,16 @@ export class HabitResolver {
       entries: []
     });
 
-    return await this.habitRepository.save(habit);
+    return { habit: await this.habitRepository.save(habit) };
   }
 
-  @Mutation(() => Habit)
+  @Mutation(() => RemoveHabitPayload)
   @UseMiddleware(Authenticated, HabitOwner)
-  async removeHabit(@Arg('id', (type) => Int) id: number): Promise<Habit> {
-    const habit = await this.habitRepository.findOneOrFail(id);
+  async removeHabit(@Arg('data') data: RemoveHabitInput): Promise<RemoveHabitPayload> {
+    const habit = await this.habitRepository.findOneOrFail(data.id);
     const deletedHabit = await this.habitRepository.remove(habit);
-    deletedHabit.id = id;
+    deletedHabit.id = data.id;
 
-    return deletedHabit;
+    return { habit: deletedHabit };
   }
 }

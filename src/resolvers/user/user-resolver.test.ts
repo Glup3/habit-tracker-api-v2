@@ -4,7 +4,13 @@ import { testConnection } from '../../test_utils/test-database';
 import { gCall } from '../../test_utils/gCall';
 import { User } from '../../entities/user';
 import { generateEmail, generateName, generatePassword, generateUsername } from '../../test_utils/data-generator';
-import { DeleteMyAccountPayload } from './user-types';
+import {
+  DeleteMyAccountPayload,
+  UpdateEmailPayload,
+  UpdateMePayload,
+  UpdatePasswordPayload,
+  UpdateUsernamePayload
+} from './user-types';
 
 let conn: Connection;
 let userRepository: Repository<User>;
@@ -20,53 +26,63 @@ afterAll(async () => {
 
 const updatePasswordMutation = `
   mutation UpdatePassword($data: UpdatePasswordInput!) {
-    updatePassword(data: $data)
+    updatePassword(data: $data) {
+      success
+    }
   }
 `;
 interface UpdatePasswordMutationResponse {
-  updatePassword: boolean;
+  updatePassword: UpdatePasswordPayload;
 }
 
 const registerMutation = `
   mutation Register($data: RegisterInput!) {
     register(data: $data) {
-      email
-      username
-      firstname
-      lastname
+      user {
+        email
+        username
+        firstname
+        lastname
+      }
     }
   }
 `;
 
 const updateEmailMutation = `
   mutation UpdateEmail($data: UpdateEmailInput!) {
-    updateEmail(data: $data)
+    updateEmail(data: $data) {
+      success
+    }
   }
 `;
 interface UpdateEmailMutationResponse {
-  updateEmail: boolean;
+  updateEmail: UpdateEmailPayload;
 }
 
 const updateUsernameMutation = `
   mutation UpdateUsername($data: UpdateUsernameInput!) {
-    updateUsername(data: $data)
+    updateUsername(data: $data) {
+      success
+    }
   }
 `;
 interface UpdateUsernameMutationResponse {
-  updateUsername: boolean;
+  updateUsername: UpdateUsernamePayload;
 }
 
 const updateMeMutation = `
   mutation UpdateMe($data: UpdateMeInput!) {
     updateMe(data: $data) {
-      username
-      firstname
-      lastname
+      user {
+        username
+        firstname
+        lastname
+      }
     }
   }
 `;
 interface UpdateMeMutationResponse {
-  updateMe: User;
+  updateMe: UpdateMePayload;
 }
 
 const deleteMyAccountMutation = `
@@ -88,18 +104,14 @@ describe('User Resolver', () => {
   test('if update password with a valid password then it should return true', async () => {
     expect.assertions(2);
 
-    const user = {
+    const user = userRepository.create({
       email: generateEmail(),
       password: generatePassword(),
       username: generateUsername(),
       firstname: generateName(),
       lastname: generateName()
-    };
-
-    await gCall({
-      source: registerMutation,
-      variableValues: { data: user }
     });
+    await userRepository.save(user);
 
     const response = await gCall({
       source: updatePasswordMutation,
@@ -108,7 +120,7 @@ describe('User Resolver', () => {
     });
 
     expect(response.data).not.toBeNull();
-    expect((<UpdatePasswordMutationResponse>response.data).updatePassword).toBeTruthy();
+    expect((<UpdatePasswordMutationResponse>response.data).updatePassword.success).toBeTruthy();
   });
 
   test('if update password with a too short password then it should return Argument Validation Error', async () => {
@@ -189,7 +201,7 @@ describe('User Resolver', () => {
     });
 
     expect(response.data).not.toBeNull();
-    expect((<UpdateEmailMutationResponse>response.data).updateEmail).toBeTruthy();
+    expect((<UpdateEmailMutationResponse>response.data).updateEmail.success).toBeTruthy();
   });
 
   test('if update email with an invalid email then it should return Argument Validation Error', async () => {
@@ -242,7 +254,7 @@ describe('User Resolver', () => {
     });
 
     expect(response.data).not.toBeNull();
-    expect((<UpdateEmailMutationResponse>response.data).updateEmail).toBeFalsy();
+    expect((<UpdateEmailMutationResponse>response.data).updateEmail.success).toBeFalsy();
   });
 
   test('if update email on not logged in user then it should return error "User is not logged in"', async () => {
@@ -259,7 +271,7 @@ describe('User Resolver', () => {
     expect(response.errors?.[0].message).toContain('User is not logged in');
   });
 
-  test('if update email on not existing/different user then it should return error "Could not find any entity of type"', async () => {
+  test('if update email on not existing/different user then it should return error "Could not find any entity of type User"', async () => {
     expect.assertions(4);
 
     const response = await gCall({
@@ -271,7 +283,7 @@ describe('User Resolver', () => {
     expect(response.data).toBeNull();
     expect(response.errors).not.toBeNull();
     expect(response.errors?.length).toEqual(1);
-    expect(response.errors?.[0].message).toContain('Could not find any entity of type');
+    expect(response.errors?.[0].message).toContain('Could not find any entity of type "User"');
   });
 
   test('if update username with a valid username then it should return true', async () => {
@@ -293,7 +305,7 @@ describe('User Resolver', () => {
     });
 
     expect(response.data).not.toBeNull();
-    expect((<UpdateUsernameMutationResponse>response.data).updateUsername).toBeTruthy();
+    expect((<UpdateUsernameMutationResponse>response.data).updateUsername.success).toBeTruthy();
   });
 
   test('if update username with a too short username then it should return Argument Validation Error', async () => {
@@ -422,8 +434,8 @@ describe('User Resolver', () => {
     });
 
     expect(response.data).not.toBeNull();
-    expect((<UpdateMeMutationResponse>response.data).updateMe.firstname).toEqual(firstname);
-    expect((<UpdateMeMutationResponse>response.data).updateMe.lastname).toEqual(lastname);
+    expect((<UpdateMeMutationResponse>response.data).updateMe.user.firstname).toEqual(firstname);
+    expect((<UpdateMeMutationResponse>response.data).updateMe.user.lastname).toEqual(lastname);
   });
 
   test('if update user with only valid firstname then it should return user', async () => {
@@ -447,7 +459,7 @@ describe('User Resolver', () => {
     });
 
     expect(response.data).not.toBeNull();
-    expect((<UpdateMeMutationResponse>response.data).updateMe.firstname).toEqual(firstname);
+    expect((<UpdateMeMutationResponse>response.data).updateMe.user.firstname).toEqual(firstname);
   });
 
   test('if update user with only valid lastname then it should return user', async () => {
@@ -471,7 +483,7 @@ describe('User Resolver', () => {
     });
 
     expect(response.data).not.toBeNull();
-    expect((<UpdateMeMutationResponse>response.data).updateMe.lastname).toEqual(lastname);
+    expect((<UpdateMeMutationResponse>response.data).updateMe.user.lastname).toEqual(lastname);
   });
 
   test('if update user with no firstname and no lastname then it should return unchanged user', async () => {
@@ -493,8 +505,8 @@ describe('User Resolver', () => {
     });
 
     expect(response.data).not.toBeNull();
-    expect((<UpdateMeMutationResponse>response.data).updateMe.firstname).toEqual(user.firstname);
-    expect((<UpdateMeMutationResponse>response.data).updateMe.lastname).toEqual(user.lastname);
+    expect((<UpdateMeMutationResponse>response.data).updateMe.user.firstname).toEqual(user.firstname);
+    expect((<UpdateMeMutationResponse>response.data).updateMe.user.lastname).toEqual(user.lastname);
   });
 
   test('if update user with too short firstname and valid lastname then it should return Argument Validation Error', async () => {
@@ -739,10 +751,11 @@ describe('User Resolver', () => {
   test('if delete user with correct password then it should return deleted user', async () => {
     expect.assertions(2);
 
+    const username = 'hypercool_user1';
     const user = {
-      email: 'super@cool.email',
+      email: generateEmail(),
       password: generatePassword(),
-      username: 'best_username3',
+      username: username,
       firstname: generateName(),
       lastname: generateName()
     };
@@ -754,7 +767,7 @@ describe('User Resolver', () => {
 
     const response = await gCall({
       source: deleteMyAccountMutation,
-      username: user.username,
+      username: username,
       variableValues: { data: { password: user.password } }
     });
 

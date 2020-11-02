@@ -4,6 +4,7 @@ import { testConnection } from '../../test_utils/test-database';
 import { gCall } from '../../test_utils/gCall';
 import { User } from '../../entities/user';
 import { generateEmail, generateName, generatePassword, generateUsername } from '../../test_utils/data-generator';
+import { LoginPayload, RegisterPayload } from './auth-types';
 
 let conn: Connection;
 let userRepository: Repository<User>;
@@ -20,31 +21,35 @@ afterAll(async () => {
 const registerMutation = `
   mutation Register($data: RegisterInput!) {
     register(data: $data) {
-      email
-      username
-      firstname
-      lastname
+      user {
+        email
+        username
+        firstname
+        lastname
+      }
     }
   }
 `;
 
 interface RegisterMutationResponse {
-  register: User;
+  register: RegisterPayload;
 }
 
 const loginMutation = `
   mutation Login($data: LoginInput!) {
     login(data: $data) {
-      username
-      email
-      firstname
-      lastname
+      user {
+        username
+        email
+        firstname
+        lastname
+      }
     }
   }
 `;
 
 interface LoginMutationResponse {
-  login: User;
+  login: LoginPayload;
 }
 
 const meQuery = `
@@ -80,7 +85,7 @@ describe('Auth Resolver', () => {
     });
 
     expect(response.data).not.toBeNull();
-    expect((<RegisterMutationResponse>response.data).register.email).toEqual(user.email);
+    expect((<RegisterMutationResponse>response.data).register.user.email).toEqual(user.email);
   });
 
   test('if registering with a non-email then it should return Argument Validation Error', async () => {
@@ -198,7 +203,7 @@ describe('Auth Resolver', () => {
     });
 
     expect(response.data).not.toBeNull();
-    expect((<RegisterMutationResponse>response.data).register.email).toEqual(user.email);
+    expect((<RegisterMutationResponse>response.data).register.user.email).toEqual(user.email);
   });
 
   test('if registering with a too long username then it should return Argument Validation Error', async () => {
@@ -513,7 +518,7 @@ describe('Auth Resolver', () => {
     });
 
     expect(response.data).not.toBeNull();
-    expect((<LoginMutationResponse>response.data).login.email).toEqual(user.email);
+    expect((<LoginMutationResponse>response.data).login.user.email).toEqual(user.email);
   });
 
   test('if login with incorrect email then it should return error "Email or Password is invalid"', async () => {
