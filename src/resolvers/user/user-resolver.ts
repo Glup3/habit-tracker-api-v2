@@ -1,4 +1,4 @@
-import { Arg, Ctx, Mutation, Query, Resolver, UseMiddleware } from 'type-graphql';
+import { Arg, Ctx, FieldResolver, Mutation, Query, Resolver, Root, UseMiddleware } from 'type-graphql';
 import { Repository } from 'typeorm';
 import { InjectRepository } from 'typeorm-typedi-extensions';
 import bcrypt from 'bcryptjs';
@@ -22,14 +22,18 @@ import {
   UpdatePasswordPayload,
   UpdateUsernamePayload
 } from './user-types';
+import { Habit } from '../../entities/habit';
 
 @Resolver(User)
 export class UserResolver {
-  constructor(@InjectRepository(User) private userRepository: Repository<User>) {}
+  constructor(
+    @InjectRepository(User) private userRepository: Repository<User>,
+    @InjectRepository(Habit) private habitRepository: Repository<Habit>
+  ) {}
 
   @Query(() => [User])
   users(): Promise<User[]> {
-    return this.userRepository.find({ relations: ['habits'] });
+    return this.userRepository.find();
   }
 
   @Mutation(() => UpdatePasswordPayload)
@@ -126,5 +130,15 @@ export class UserResolver {
     ctx.res.cookie(COOKIE_ACCESS_TOKEN, { maxAge: 0 });
 
     return { user: deletedUser };
+  }
+
+  @FieldResolver()
+  async habits(@Root() user: User): Promise<Habit[]> {
+    const habits = await this.habitRepository.find({ where: { user } });
+    if (!habits) {
+      throw new Error(`Couldnt find habits for User ${user.username}`);
+    }
+
+    return habits;
   }
 }

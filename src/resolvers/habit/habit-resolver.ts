@@ -1,6 +1,7 @@
-import { Arg, Ctx, Int, Mutation, Query, Resolver, UseMiddleware } from 'type-graphql';
+import { Arg, Ctx, FieldResolver, Mutation, Query, Resolver, Root, UseMiddleware } from 'type-graphql';
 import { Repository } from 'typeorm';
 import { InjectRepository } from 'typeorm-typedi-extensions';
+import { Entry } from '../../entities/entry';
 import { Habit } from '../../entities/habit';
 import { User } from '../../entities/user';
 import { Authenticated } from '../../middlewares/authenticated';
@@ -13,20 +14,21 @@ import { AddHabitPayload, RemoveHabitPayload } from './habit-types';
 export class HabitResolver {
   constructor(
     @InjectRepository(Habit) private readonly habitRepository: Repository<Habit>,
-    @InjectRepository(User) private readonly userRepository: Repository<User>
+    @InjectRepository(User) private readonly userRepository: Repository<User>,
+    @InjectRepository(Entry) private readonly entryRepository: Repository<Entry>
   ) {}
 
   @Query(() => [Habit])
   @UseMiddleware(Authenticated)
   async myHabits(@Ctx() ctx: Context): Promise<Habit[]> {
     const user = await this.userRepository.findOneOrFail({ username: ctx.req.username });
-    return this.habitRepository.find({ where: { user }, relations: ['user', 'entries'], order: { title: 'ASC' } });
+    return this.habitRepository.find({ where: { user }, order: { title: 'ASC' } });
   }
 
   @Query(() => Habit)
   @UseMiddleware(Authenticated, HabitOwner)
   habit(@Arg('data') data: HabitInput): Promise<Habit> {
-    return this.habitRepository.findOneOrFail({ where: { id: data.id }, relations: ['entries'] });
+    return this.habitRepository.findOneOrFail({ where: { id: data.id } });
   }
 
   @Mutation(() => AddHabitPayload)
@@ -53,5 +55,26 @@ export class HabitResolver {
     deletedHabit.id = data.id;
 
     return { habit: deletedHabit };
+  }
+
+  @FieldResolver()
+  async user(@Root() habit: Habit): Promise<User> {
+    const foundHabit = await this.habitRepository.findOneOrFail({ where: { id: habit.id }, relations: ['user'] });
+
+    if (!foundHabit.user) {
+      throw new Error(`Couldnt find User for Habit ID ${habit.id}`);
+    }
+
+    return foundHabit.user;
+  }
+
+  @FieldResolver()
+  async entries(@Root() habit: Habit): Promise<Entry[]> {
+    const entries = await this.entryRepository.find({ where: { habit: habit } });
+    if (!entries) {
+      throw new Error(`Couldnt find entries for Habit ID ${habit.id}`);
+    }
+
+    return entries;
   }
 }
