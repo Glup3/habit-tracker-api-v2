@@ -13,7 +13,6 @@ import {
 } from '../../test_utils/data-generator';
 import { User } from '../../entities/user';
 import { Habit } from '../../entities/habit';
-import { AddHabitPayload, RemoveHabitPayload } from './habit-types';
 
 let conn: Connection;
 let userRepository: Repository<User>;
@@ -40,9 +39,6 @@ const addHabitMutation = `
     }
   }
 `;
-interface AddHabitMutationResponse {
-  addHabit: AddHabitPayload;
-}
 
 const habitQuery = `
   query Habit($data: HabitInput!) {
@@ -61,17 +57,12 @@ const habitQuery = `
 const myHabitsQuery = `
   query MyHabits {
     myHabits {
-      id
       title
       description
       startDate
     }
   }
 `;
-
-interface MyHabitsQueryResult {
-  myHabits: Habit[];
-}
 
 const removeHabitMutation = `
   mutation RemoveHabit($data: RemoveHabitInput!) {
@@ -86,13 +77,9 @@ const removeHabitMutation = `
   }
 `;
 
-interface RemoveHabitMutationResult {
-  removeHabit: RemoveHabitPayload;
-}
-
 describe('Habit Resolver', () => {
   test('if user adds habit with valid title, valid description and valid startDate then it should return created habit', async () => {
-    expect.assertions(2);
+    expect.assertions(1);
 
     const habit = {
       title: generateTitle(),
@@ -115,12 +102,21 @@ describe('Habit Resolver', () => {
       username: user.username
     });
 
-    expect(response.data).not.toBeNull();
-    expect((<AddHabitMutationResponse>response.data).addHabit.habit.title).toEqual(habit.title);
+    expect(response).toMatchObject({
+      data: {
+        addHabit: {
+          habit: {
+            title: habit.title,
+            description: habit.description,
+            startDate: habit.startDate
+          }
+        }
+      }
+    });
   });
 
   test('if user adds habit with valid title, no description and valid startDate then it should return created habit', async () => {
-    expect.assertions(2);
+    expect.assertions(1);
 
     const habit = {
       title: generateTitle(),
@@ -142,8 +138,17 @@ describe('Habit Resolver', () => {
       username: user.username
     });
 
-    expect(response.data).not.toBeNull();
-    expect((<AddHabitMutationResponse>response.data).addHabit.habit.description).toBeNull();
+    expect(response).toMatchObject({
+      data: {
+        addHabit: {
+          habit: {
+            title: habit.title,
+            description: null,
+            startDate: habit.startDate
+          }
+        }
+      }
+    });
   });
 
   test('if user adds habit with too long title, valid description and valid startDate then it should return Argument Validation Error', async () => {
@@ -301,7 +306,7 @@ describe('Habit Resolver', () => {
   });
 
   test('if user requests a habit he owns by id then it should return habit', async () => {
-    expect.assertions(2);
+    expect.assertions(1);
 
     const habit1 = habitRepository.create({
       title: generateTitle(),
@@ -333,7 +338,6 @@ describe('Habit Resolver', () => {
       variableValues: { data: { id: h1.id } }
     });
 
-    expect(response.data).not.toBeNull();
     expect(response).toMatchObject({
       data: {
         habit: {
@@ -406,30 +410,30 @@ describe('Habit Resolver', () => {
   });
 
   test('if user requests all his habits then it should return all his habits', async () => {
-    expect.assertions(2);
+    expect.assertions(1);
 
     const habit1 = habitRepository.create({
-      title: generateTitle(),
+      title: 'title1',
       description: generateDescription(),
       startDate: generateDate().toISOString()
     });
     const habit2 = habitRepository.create({
-      title: generateTitle(),
+      title: 'title2',
       description: generateDescription(),
       startDate: generateDate().toISOString()
     });
     const habit3 = habitRepository.create({
-      title: generateTitle(),
+      title: 'title3',
       description: generateDescription(),
       startDate: generateDate().toISOString()
     });
     const habit4 = habitRepository.create({
-      title: generateTitle(),
+      title: 'title4',
       description: generateDescription(),
       startDate: generateDate().toISOString()
     });
     const habit5 = habitRepository.create({
-      title: generateTitle(),
+      title: 'title5',
       description: generateDescription(),
       startDate: generateDate().toISOString()
     });
@@ -464,12 +468,36 @@ describe('Habit Resolver', () => {
       username: user1.username
     });
 
-    expect(response.data).not.toBeNull();
-    expect((<MyHabitsQueryResult>response.data).myHabits.length).toEqual(user1.habits.length);
+    expect(response).toMatchObject({
+      data: {
+        myHabits: [
+          {
+            title: habit1.title,
+            description: habit1.description,
+            startDate: habit1.startDate
+          },
+          {
+            title: habit2.title,
+            description: habit2.description,
+            startDate: habit2.startDate
+          },
+          {
+            title: habit4.title,
+            description: habit4.description,
+            startDate: habit4.startDate
+          },
+          {
+            title: habit5.title,
+            description: habit5.description,
+            startDate: habit5.startDate
+          }
+        ]
+      }
+    });
   });
 
   test('if user doesnt have habits and requests all his habits then it should return empty array', async () => {
-    expect.assertions(3);
+    expect.assertions(1);
 
     const user = userRepository.create({
       email: generateEmail(),
@@ -486,9 +514,11 @@ describe('Habit Resolver', () => {
       username: user.username
     });
 
-    expect(response.data).not.toBeNull();
-    expect((<MyHabitsQueryResult>response.data).myHabits.length).toEqual(user.habits.length);
-    expect((<MyHabitsQueryResult>response.data).myHabits.length).toEqual(0);
+    expect(response).toMatchObject({
+      data: {
+        myHabits: []
+      }
+    });
   });
 
   test('if user who is not logged in requests all his habits then it should return error "User is not logged in"', async () => {
@@ -519,7 +549,7 @@ describe('Habit Resolver', () => {
   });
 
   test('if user removes a habit it has then it should return deleted habit', async () => {
-    expect.assertions(2);
+    expect.assertions(1);
 
     const habit1 = habitRepository.create({
       title: generateTitle(),
@@ -556,8 +586,18 @@ describe('Habit Resolver', () => {
       variableValues: { data: { id: savedHabit2.id } }
     });
 
-    expect(response.data).not.toBeNull();
-    expect((<RemoveHabitMutationResult>response.data).removeHabit.habit.id).toEqual(savedHabit2.id.toString());
+    expect(response).toMatchObject({
+      data: {
+        removeHabit: {
+          habit: {
+            id: savedHabit2.id.toString(),
+            title: savedHabit2.title,
+            description: savedHabit2.description,
+            startDate: savedHabit2.startDate
+          }
+        }
+      }
+    });
   });
 
   test('if user removes a habit it doesnt have then it should fail', async () => {

@@ -4,7 +4,6 @@ import { testConnection } from '../../test_utils/test-database';
 import { gCall } from '../../test_utils/gCall';
 import { User } from '../../entities/user';
 import { generateEmail, generateName, generatePassword, generateUsername } from '../../test_utils/data-generator';
-import { LoginPayload, RegisterPayload } from './auth-types';
 
 let conn: Connection;
 let userRepository: Repository<User>;
@@ -31,10 +30,6 @@ const registerMutation = `
   }
 `;
 
-interface RegisterMutationResponse {
-  register: RegisterPayload;
-}
-
 const loginMutation = `
   mutation Login($data: LoginInput!) {
     login(data: $data) {
@@ -47,10 +42,6 @@ const loginMutation = `
     }
   }
 `;
-
-interface LoginMutationResponse {
-  login: LoginPayload;
-}
 
 const meQuery = `
   query Me {
@@ -69,7 +60,7 @@ interface MeQueryResponse {
 
 describe('Auth Resolver', () => {
   test('if registering with good values then return user', async () => {
-    expect.assertions(2);
+    expect.assertions(1);
 
     const user = {
       email: 'funny@email.com',
@@ -84,8 +75,18 @@ describe('Auth Resolver', () => {
       variableValues: { data: user }
     });
 
-    expect(response.data).not.toBeNull();
-    expect((<RegisterMutationResponse>response.data).register.user.email).toEqual(user.email);
+    expect(response).toMatchObject({
+      data: {
+        register: {
+          user: {
+            email: user.email,
+            username: user.username,
+            firstname: user.firstname,
+            lastname: user.lastname
+          }
+        }
+      }
+    });
   });
 
   test('if registering with a non-email then it should return Argument Validation Error', async () => {
@@ -187,7 +188,7 @@ describe('Auth Resolver', () => {
   });
 
   test('if registering with an username that has underscores then return user', async () => {
-    expect.assertions(2);
+    expect.assertions(1);
 
     const user = {
       email: generateEmail(),
@@ -202,8 +203,18 @@ describe('Auth Resolver', () => {
       variableValues: { data: user }
     });
 
-    expect(response.data).not.toBeNull();
-    expect((<RegisterMutationResponse>response.data).register.user.email).toEqual(user.email);
+    expect(response).toMatchObject({
+      data: {
+        register: {
+          user: {
+            email: user.email,
+            username: user.username,
+            firstname: user.firstname,
+            lastname: user.lastname
+          }
+        }
+      }
+    });
   });
 
   test('if registering with a too long username then it should return Argument Validation Error', async () => {
@@ -493,7 +504,7 @@ describe('Auth Resolver', () => {
   });
 
   test('if login with correct email and password then it should return user', async () => {
-    expect.assertions(2);
+    expect.assertions(1);
     const user = {
       email: generateEmail(),
       password: generatePassword(),
@@ -517,8 +528,18 @@ describe('Auth Resolver', () => {
       }
     });
 
-    expect(response.data).not.toBeNull();
-    expect((<LoginMutationResponse>response.data).login.user.email).toEqual(user.email);
+    expect(response).toMatchObject({
+      data: {
+        login: {
+          user: {
+            email: user.email,
+            username: user.username,
+            firstname: user.firstname,
+            lastname: user.lastname
+          }
+        }
+      }
+    });
   });
 
   test('if login with incorrect email then it should return error "Email or Password is invalid"', async () => {

@@ -4,13 +4,6 @@ import { testConnection } from '../../test_utils/test-database';
 import { gCall } from '../../test_utils/gCall';
 import { User } from '../../entities/user';
 import { generateEmail, generateName, generatePassword, generateUsername } from '../../test_utils/data-generator';
-import {
-  DeleteMyAccountPayload,
-  UpdateEmailPayload,
-  UpdateMePayload,
-  UpdatePasswordPayload,
-  UpdateUsernamePayload
-} from './user-types';
 
 let conn: Connection;
 let userRepository: Repository<User>;
@@ -31,9 +24,6 @@ const updatePasswordMutation = `
     }
   }
 `;
-interface UpdatePasswordMutationResponse {
-  updatePassword: UpdatePasswordPayload;
-}
 
 const registerMutation = `
   mutation Register($data: RegisterInput!) {
@@ -55,9 +45,6 @@ const updateEmailMutation = `
     }
   }
 `;
-interface UpdateEmailMutationResponse {
-  updateEmail: UpdateEmailPayload;
-}
 
 const updateUsernameMutation = `
   mutation UpdateUsername($data: UpdateUsernameInput!) {
@@ -66,9 +53,6 @@ const updateUsernameMutation = `
     }
   }
 `;
-interface UpdateUsernameMutationResponse {
-  updateUsername: UpdateUsernamePayload;
-}
 
 const updateMeMutation = `
   mutation UpdateMe($data: UpdateMeInput!) {
@@ -81,28 +65,21 @@ const updateMeMutation = `
     }
   }
 `;
-interface UpdateMeMutationResponse {
-  updateMe: UpdateMePayload;
-}
 
 const deleteMyAccountMutation = `
   mutation DeleteMyAccount($data: DeleteMyAccountInput!) {
     deleteMyAccount(data: $data) {
       user {
-        id
         username
         email
       }
     }
   }
 `;
-interface DeleteMyAccountMutationResponse {
-  deleteMyAccount: DeleteMyAccountPayload;
-}
 
 describe('User Resolver', () => {
   test('if update password with a valid password then it should return true', async () => {
-    expect.assertions(2);
+    expect.assertions(1);
 
     const user = userRepository.create({
       email: generateEmail(),
@@ -119,8 +96,13 @@ describe('User Resolver', () => {
       variableValues: { data: { password: 'newPassword1' } }
     });
 
-    expect(response.data).not.toBeNull();
-    expect((<UpdatePasswordMutationResponse>response.data).updatePassword.success).toBeTruthy();
+    expect(response).toMatchObject({
+      data: {
+        updatePassword: {
+          success: true
+        }
+      }
+    });
   });
 
   test('if update password with a too short password then it should return Argument Validation Error', async () => {
@@ -183,7 +165,7 @@ describe('User Resolver', () => {
   });
 
   test('if update email with a valid and new email then it should return true', async () => {
-    expect.assertions(2);
+    expect.assertions(1);
 
     const user = userRepository.create({
       email: 'insane@custom.email',
@@ -200,8 +182,13 @@ describe('User Resolver', () => {
       variableValues: { data: { email: 'mynew@email.com' } }
     });
 
-    expect(response.data).not.toBeNull();
-    expect((<UpdateEmailMutationResponse>response.data).updateEmail.success).toBeTruthy();
+    expect(response).toMatchObject({
+      data: {
+        updateEmail: {
+          success: true
+        }
+      }
+    });
   });
 
   test('if update email with an invalid email then it should return Argument Validation Error', async () => {
@@ -235,7 +222,7 @@ describe('User Resolver', () => {
   });
 
   test('if update email with an already existing email then it should return false', async () => {
-    expect.assertions(2);
+    expect.assertions(1);
 
     const user = userRepository.create({
       email: generateEmail(),
@@ -253,8 +240,13 @@ describe('User Resolver', () => {
       variableValues: { data: { email: user.email } }
     });
 
-    expect(response.data).not.toBeNull();
-    expect((<UpdateEmailMutationResponse>response.data).updateEmail.success).toBeFalsy();
+    expect(response).toMatchObject({
+      data: {
+        updateEmail: {
+          success: false
+        }
+      }
+    });
   });
 
   test('if update email on not logged in user then it should return error "User is not logged in"', async () => {
@@ -287,7 +279,7 @@ describe('User Resolver', () => {
   });
 
   test('if update username with a valid username then it should return true', async () => {
-    expect.assertions(2);
+    expect.assertions(1);
 
     const user = userRepository.create({
       email: generateEmail(),
@@ -304,8 +296,13 @@ describe('User Resolver', () => {
       variableValues: { data: { username: 'cool_new_username1' } }
     });
 
-    expect(response.data).not.toBeNull();
-    expect((<UpdateUsernameMutationResponse>response.data).updateUsername.success).toBeTruthy();
+    expect(response).toMatchObject({
+      data: {
+        updateUsername: {
+          success: true
+        }
+      }
+    });
   });
 
   test('if update username with a too short username then it should return Argument Validation Error', async () => {
@@ -413,7 +410,7 @@ describe('User Resolver', () => {
   });
 
   test('if update user with valid firstname and valid lastname then it should return user', async () => {
-    expect.assertions(3);
+    expect.assertions(1);
 
     const firstname = 'Max';
     const lastname = 'Mustermann';
@@ -433,13 +430,21 @@ describe('User Resolver', () => {
       variableValues: { data: { firstname, lastname } }
     });
 
-    expect(response.data).not.toBeNull();
-    expect((<UpdateMeMutationResponse>response.data).updateMe.user.firstname).toEqual(firstname);
-    expect((<UpdateMeMutationResponse>response.data).updateMe.user.lastname).toEqual(lastname);
+    expect(response).toMatchObject({
+      data: {
+        updateMe: {
+          user: {
+            username: user.username,
+            firstname,
+            lastname
+          }
+        }
+      }
+    });
   });
 
   test('if update user with only valid firstname then it should return user', async () => {
-    expect.assertions(2);
+    expect.assertions(1);
 
     const firstname = 'Max';
 
@@ -458,12 +463,21 @@ describe('User Resolver', () => {
       variableValues: { data: { firstname } }
     });
 
-    expect(response.data).not.toBeNull();
-    expect((<UpdateMeMutationResponse>response.data).updateMe.user.firstname).toEqual(firstname);
+    expect(response).toMatchObject({
+      data: {
+        updateMe: {
+          user: {
+            username: user.username,
+            firstname,
+            lastname: user.lastname
+          }
+        }
+      }
+    });
   });
 
   test('if update user with only valid lastname then it should return user', async () => {
-    expect.assertions(2);
+    expect.assertions(1);
 
     const lastname = 'Mustermann';
 
@@ -482,12 +496,21 @@ describe('User Resolver', () => {
       variableValues: { data: { lastname } }
     });
 
-    expect(response.data).not.toBeNull();
-    expect((<UpdateMeMutationResponse>response.data).updateMe.user.lastname).toEqual(lastname);
+    expect(response).toMatchObject({
+      data: {
+        updateMe: {
+          user: {
+            username: user.username,
+            firstname: user.firstname,
+            lastname
+          }
+        }
+      }
+    });
   });
 
   test('if update user with no firstname and no lastname then it should return unchanged user', async () => {
-    expect.assertions(3);
+    expect.assertions(1);
 
     const user = userRepository.create({
       email: generateEmail(),
@@ -504,9 +527,17 @@ describe('User Resolver', () => {
       variableValues: { data: {} }
     });
 
-    expect(response.data).not.toBeNull();
-    expect((<UpdateMeMutationResponse>response.data).updateMe.user.firstname).toEqual(user.firstname);
-    expect((<UpdateMeMutationResponse>response.data).updateMe.user.lastname).toEqual(user.lastname);
+    expect(response).toMatchObject({
+      data: {
+        updateMe: {
+          user: {
+            username: user.username,
+            firstname: user.firstname,
+            lastname: user.lastname
+          }
+        }
+      }
+    });
   });
 
   test('if update user with too short firstname and valid lastname then it should return Argument Validation Error', async () => {
@@ -749,7 +780,7 @@ describe('User Resolver', () => {
   });
 
   test('if delete user with correct password then it should return deleted user', async () => {
-    expect.assertions(2);
+    expect.assertions(1);
 
     const username = 'hypercool_user1';
     const user = {
@@ -771,8 +802,16 @@ describe('User Resolver', () => {
       variableValues: { data: { password: user.password } }
     });
 
-    expect(response.data).not.toBeNull();
-    expect((<DeleteMyAccountMutationResponse>response.data).deleteMyAccount.user.username).toEqual(user.username);
+    expect(response).toMatchObject({
+      data: {
+        deleteMyAccount: {
+          user: {
+            username: user.username,
+            email: user.email
+          }
+        }
+      }
+    });
   });
 
   test('if delete user with incorrect password then it should return Error "Password is incorrect"', async () => {
