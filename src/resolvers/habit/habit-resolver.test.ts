@@ -169,7 +169,7 @@ describe('Habit Resolver', () => {
   });
 
   test('if user adds habit with too long title, valid description and valid startDate then it should return Argument Validation Error', async () => {
-    expect.assertions(4);
+    expect.assertions(5);
 
     const habit = {
       title: generateTitle(65),
@@ -187,10 +187,13 @@ describe('Habit Resolver', () => {
     expect(response.errors).not.toBeNull();
     expect(response.errors?.length).toEqual(1);
     expect(response.errors?.[0].message).toEqual('Argument Validation Error');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[0].constraints?.maxLength
+    ).toEqual('title must be shorter than or equal to 64 characters');
   });
 
   test('if user adds habit with valid title, too long description and valid startDate then it should return Argument Validation Error', async () => {
-    expect.assertions(4);
+    expect.assertions(5);
 
     const habit = {
       title: generateTitle(),
@@ -208,6 +211,9 @@ describe('Habit Resolver', () => {
     expect(response.errors).not.toBeNull();
     expect(response.errors?.length).toEqual(1);
     expect(response.errors?.[0].message).toEqual('Argument Validation Error');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[0].constraints?.maxLength
+    ).toEqual('description must be shorter than or equal to 255 characters');
   });
 
   test('if user adds habit with valid title, valid description and invalid startDate then it should return Argument Validation Error', async () => {
@@ -215,20 +221,29 @@ describe('Habit Resolver', () => {
 
     const habit = {
       title: generateTitle(),
-      description: generateDescription(256),
+      description: generateDescription(),
       startDate: 'not a date'
     };
+    const user = userRepository.create({
+      email: generateEmail(),
+      password: generatePassword(),
+      username: 'superunqiue_1312',
+      firstname: generateName(),
+      lastname: generateName(),
+      habits: []
+    });
+    await userRepository.save(user);
 
     const response = await gCall({
       source: addHabitMutation,
       variableValues: { data: habit },
-      username: 'super_user'
+      username: user.username
     });
 
     expect(response.data).toBeNull();
     expect(response.errors).not.toBeNull();
     expect(response.errors?.length).toEqual(1);
-    expect(response.errors?.[0].message).toEqual('Argument Validation Error');
+    expect(response.errors?.[0].message).toContain('invalid input syntax for type timestamp');
   });
 
   test('if user who is not logged in adds a valid habit then it should return error "User is not logged in"', async () => {
@@ -551,7 +566,7 @@ describe('Habit Resolver', () => {
     expect(response.errors?.[0].message).toEqual('User is not logged in');
   });
 
-  test('if user who doesnt exist requests all his habits then it should throw error "EntityNotFound: Could not find any entity of type User"', async () => {
+  test('if user who doesnt exist requests all his habits then it should return error "EntityNotFound: Could not find any entity of type User"', async () => {
     expect.assertions(4);
 
     const response = await gCall({
@@ -617,7 +632,7 @@ describe('Habit Resolver', () => {
     });
   });
 
-  test('if user removes a habit it doesnt have then it should fail', async () => {
+  test('if user removes a habit it doesnt have then it should return error "Habit with the ID does not exist"', async () => {
     expect.assertions(4);
 
     const habit1 = habitRepository.create({
@@ -920,7 +935,7 @@ describe('Habit Resolver', () => {
     });
   });
 
-  test('if user updates habit he owns with too long title, valid description and valid startDate then it should return updated habit', async () => {
+  test('if user updates habit he owns with too long title, valid description and valid startDate then it should return Argument Validation Error', async () => {
     expect.assertions(5);
 
     const habit = habitRepository.create({
@@ -962,7 +977,7 @@ describe('Habit Resolver', () => {
     ).toEqual('title must be shorter than or equal to 64 characters');
   });
 
-  test('if user updates habit he owns with too long title, no description and valid startDate then it should return updated habit', async () => {
+  test('if user updates habit he owns with too long title, no description and valid startDate then it should return Argument Validation Error', async () => {
     expect.assertions(5);
 
     const habit = habitRepository.create({
@@ -1003,7 +1018,7 @@ describe('Habit Resolver', () => {
     ).toEqual('title must be shorter than or equal to 64 characters');
   });
 
-  test('if user updates habit he owns with too long title, no description and no startDate then it should return updated habit', async () => {
+  test('if user updates habit he owns with too long title, no description and no startDate then it should return Argument Validation Error', async () => {
     expect.assertions(5);
 
     const habit = habitRepository.create({
@@ -1043,7 +1058,7 @@ describe('Habit Resolver', () => {
     ).toEqual('title must be shorter than or equal to 64 characters');
   });
 
-  test('if user updates habit he owns with too long title, valid description and no startDate then it should return updated habit', async () => {
+  test('if user updates habit he owns with too long title, valid description and no startDate then it should return Argument Validation Error', async () => {
     expect.assertions(5);
 
     const habit = habitRepository.create({
@@ -1084,7 +1099,7 @@ describe('Habit Resolver', () => {
     ).toEqual('title must be shorter than or equal to 64 characters');
   });
 
-  test('if user updates habit he owns with valid title, too long description and valid startDate then it should return updated habit', async () => {
+  test('if user updates habit he owns with valid title, too long description and valid startDate then it should return Argument Validation Error', async () => {
     expect.assertions(5);
 
     const habit = habitRepository.create({
@@ -1126,7 +1141,7 @@ describe('Habit Resolver', () => {
     ).toEqual('description must be shorter than or equal to 255 characters');
   });
 
-  test('if user updates habit he owns with valid title, too long description and no startDate then it should return updated habit', async () => {
+  test('if user updates habit he owns with valid title, too long description and no startDate then it should return Argument Validation Error', async () => {
     expect.assertions(5);
 
     const habit = habitRepository.create({
@@ -1167,7 +1182,7 @@ describe('Habit Resolver', () => {
     ).toEqual('description must be shorter than or equal to 255 characters');
   });
 
-  test('if user updates habit he owns with no title, too long description and valid startDate then it should return updated habit', async () => {
+  test('if user updates habit he owns with no title, too long description and valid startDate then it should return Argument Validation Error', async () => {
     expect.assertions(5);
 
     const habit = habitRepository.create({
@@ -1208,7 +1223,7 @@ describe('Habit Resolver', () => {
     ).toEqual('description must be shorter than or equal to 255 characters');
   });
 
-  test('if user updates habit he owns with no title, too long description and no startDate then it should return updated habit', async () => {
+  test('if user updates habit he owns with no title, too long description and no startDate then it should return Argument Validation Error', async () => {
     expect.assertions(5);
 
     const habit = habitRepository.create({
@@ -1287,7 +1302,7 @@ describe('Habit Resolver', () => {
     expect(response.errors?.[0].message).toContain('invalid input syntax for type timestamp');
   });
 
-  test('if user updates habit he owns with valid title, no description and invalid startDate then it should return updated habit', async () => {
+  test('if user updates habit he owns with valid title, no description and invalid startDate then it should return error "invalid input syntax for type timestamp"', async () => {
     expect.assertions(4);
 
     const habit = habitRepository.create({
@@ -1325,7 +1340,7 @@ describe('Habit Resolver', () => {
     expect(response.errors?.[0].message).toContain('invalid input syntax for type timestamp');
   });
 
-  test('if user updates habit he owns with no title, valid description and invalid startDate then it should return updated habit', async () => {
+  test('if user updates habit he owns with no title, valid description and invalid startDate then it should return error "invalid input syntax for type timestamp"', async () => {
     expect.assertions(4);
 
     const habit = habitRepository.create({
@@ -1363,7 +1378,7 @@ describe('Habit Resolver', () => {
     expect(response.errors?.[0].message).toContain('invalid input syntax for type timestamp');
   });
 
-  test('if user updates habit he owns with no title, no description and invalid startDate then it should return updated habit', async () => {
+  test('if user updates habit he owns with no title, no description and invalid startDate then it should return error "invalid input syntax for type timestamp"', async () => {
     expect.assertions(4);
 
     const habit = habitRepository.create({
@@ -1400,7 +1415,7 @@ describe('Habit Resolver', () => {
     expect(response.errors?.[0].message).toContain('invalid input syntax for type timestamp');
   });
 
-  test('if user updates habit he owns with too long title, too long description and valid startDate then it should return updated habit', async () => {
+  test('if user updates habit he owns with too long title, too long description and valid startDate then it should return Argument Validation Error', async () => {
     expect.assertions(6);
 
     const startDate = '2020-02-07T21:04:39.573Z';
@@ -1447,7 +1462,7 @@ describe('Habit Resolver', () => {
     ).toEqual('description must be shorter than or equal to 255 characters');
   });
 
-  test('if user updates habit he owns with too long title, too long description and invalid startDate then it should return updated habit', async () => {
+  test('if user updates habit he owns with too long title, too long description and invalid startDate then it should return Argument Validation Error', async () => {
     expect.assertions(6);
 
     const habit = habitRepository.create({
@@ -1492,7 +1507,7 @@ describe('Habit Resolver', () => {
     ).toEqual('description must be shorter than or equal to 255 characters');
   });
 
-  test('if user updates habit he owns with too long title, valid description and invalid startDate then it should return updated habit', async () => {
+  test('if user updates habit he owns with too long title, valid description and invalid startDate then it should return Argument Validation Error', async () => {
     expect.assertions(5);
 
     const habit = habitRepository.create({
@@ -1534,7 +1549,7 @@ describe('Habit Resolver', () => {
     ).toEqual('title must be shorter than or equal to 64 characters');
   });
 
-  test('if user updates habit he owns with valid title, too long description and invalid startDate then it should return updated habit', async () => {
+  test('if user updates habit he owns with valid title, too long description and invalid startDate then it should return Argument Validation Error', async () => {
     expect.assertions(5);
 
     const habit = habitRepository.create({
@@ -1576,7 +1591,7 @@ describe('Habit Resolver', () => {
     ).toEqual('description must be shorter than or equal to 255 characters');
   });
 
-  test('if user updates habit he doesnt own with valid title, valid description and valid startDate then it should return updated habit', async () => {
+  test('if user updates habit he doesnt own with valid title, valid description and valid startDate then it should return error "Habit with the ID does not exist"', async () => {
     expect.assertions(4);
 
     const title = 'Dancing KPOP';
@@ -1619,7 +1634,7 @@ describe('Habit Resolver', () => {
     expect(response.errors?.[0].message).toEqual(`Habit with the ID ${savedHabit.id} does not exist`);
   });
 
-  test('if user updates habit he doesnt own with too long title, valid description and valid startDate then it should return updated habit', async () => {
+  test('if user updates habit he doesnt own with too long title, valid description and valid startDate then it should return error "Habit with the ID does not exist"', async () => {
     expect.assertions(4);
 
     const description = 'Dancing KPOP songs for atleast 60 minutes';

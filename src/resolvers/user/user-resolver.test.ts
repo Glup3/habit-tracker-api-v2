@@ -4,6 +4,8 @@ import { testConnection } from '../../test_utils/test-database';
 import { gCall } from '../../test_utils/gCall';
 import { User } from '../../entities/user';
 import { generateEmail, generateName, generatePassword, generateUsername } from '../../test_utils/data-generator';
+import { ArgumentValidationError } from 'type-graphql';
+import { Maybe } from 'graphql/jsutils/Maybe';
 
 let conn: Connection;
 let userRepository: Repository<User>;
@@ -106,7 +108,7 @@ describe('User Resolver', () => {
   });
 
   test('if update password with a too short password then it should return Argument Validation Error', async () => {
-    expect.assertions(4);
+    expect.assertions(5);
 
     const response = await gCall({
       source: updatePasswordMutation,
@@ -118,10 +120,13 @@ describe('User Resolver', () => {
     expect(response.errors).not.toBeNull();
     expect(response.errors?.length).toEqual(1);
     expect(response.errors?.[0].message).toContain('Argument Validation Error');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[0].constraints?.length
+    ).toEqual('password must be longer than or equal to 8 characters');
   });
 
   test('if update password with a too long password then it should return Argument Validation Error', async () => {
-    expect.assertions(4);
+    expect.assertions(5);
 
     const response = await gCall({
       source: updatePasswordMutation,
@@ -133,6 +138,9 @@ describe('User Resolver', () => {
     expect(response.errors).not.toBeNull();
     expect(response.errors?.length).toEqual(1);
     expect(response.errors?.[0].message).toContain('Argument Validation Error');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[0].constraints?.length
+    ).toEqual('password must be shorter than or equal to 64 characters');
   });
 
   test('if update password on not logged in user then it should return error "User is not logged in"', async () => {
@@ -192,7 +200,7 @@ describe('User Resolver', () => {
   });
 
   test('if update email with an invalid email then it should return Argument Validation Error', async () => {
-    expect.assertions(4);
+    expect.assertions(5);
 
     const response = await gCall({
       source: updateEmailMutation,
@@ -204,10 +212,13 @@ describe('User Resolver', () => {
     expect(response.errors).not.toBeNull();
     expect(response.errors?.length).toEqual(1);
     expect(response.errors?.[0].message).toContain('Argument Validation Error');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[0].constraints?.isEmail
+    ).toEqual('email must be an email');
   });
 
   test('if update email with no email then it should return Argument Validation Error', async () => {
-    expect.assertions(4);
+    expect.assertions(5);
 
     const response = await gCall({
       source: updateEmailMutation,
@@ -219,6 +230,9 @@ describe('User Resolver', () => {
     expect(response.errors).not.toBeNull();
     expect(response.errors?.length).toEqual(1);
     expect(response.errors?.[0].message).toContain('Argument Validation Error');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[0].constraints?.isEmail
+    ).toEqual('email must be an email');
   });
 
   test('if update email with an already existing email then it should return false', async () => {
@@ -306,7 +320,7 @@ describe('User Resolver', () => {
   });
 
   test('if update username with a too short username then it should return Argument Validation Error', async () => {
-    expect.assertions(4);
+    expect.assertions(5);
 
     const response = await gCall({
       source: updateUsernameMutation,
@@ -318,10 +332,13 @@ describe('User Resolver', () => {
     expect(response.errors).not.toBeNull();
     expect(response.errors?.length).toEqual(1);
     expect(response.errors?.[0].message).toContain('Argument Validation Error');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[0].constraints?.length
+    ).toEqual('username must be longer than or equal to 3 characters');
   });
 
   test('if update username with a too long username then it should return Argument Validation Error', async () => {
-    expect.assertions(4);
+    expect.assertions(5);
 
     const response = await gCall({
       source: updateUsernameMutation,
@@ -333,10 +350,13 @@ describe('User Resolver', () => {
     expect(response.errors).not.toBeNull();
     expect(response.errors?.length).toEqual(1);
     expect(response.errors?.[0].message).toContain('Argument Validation Error');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[0].constraints?.length
+    ).toEqual('username must be shorter than or equal to 32 characters');
   });
 
   test('if update username with an empty username then it should return Argument Validation Error', async () => {
-    expect.assertions(4);
+    expect.assertions(5);
 
     const response = await gCall({
       source: updateUsernameMutation,
@@ -348,10 +368,13 @@ describe('User Resolver', () => {
     expect(response.errors).not.toBeNull();
     expect(response.errors?.length).toEqual(1);
     expect(response.errors?.[0].message).toContain('Argument Validation Error');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[0].constraints?.length
+    ).toEqual('username must be longer than or equal to 3 characters');
   });
 
   test('if update username with an invalid username (special chars) then it should return Argument Validation Error', async () => {
-    expect.assertions(4);
+    expect.assertions(5);
 
     const response = await gCall({
       source: updateUsernameMutation,
@@ -363,10 +386,13 @@ describe('User Resolver', () => {
     expect(response.errors).not.toBeNull();
     expect(response.errors?.length).toEqual(1);
     expect(response.errors?.[0].message).toContain('Argument Validation Error');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[0].constraints?.isUsername
+    ).toEqual('');
   });
 
   test('if update username with an invalid username (doesnt start with a char) then it should return Argument Validation Error', async () => {
-    expect.assertions(4);
+    expect.assertions(5);
 
     const response = await gCall({
       source: updateUsernameMutation,
@@ -378,6 +404,9 @@ describe('User Resolver', () => {
     expect(response.errors).not.toBeNull();
     expect(response.errors?.length).toEqual(1);
     expect(response.errors?.[0].message).toContain('Argument Validation Error');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[0].constraints?.isUsername
+    ).toEqual('');
   });
 
   test('if update username on not logged in user then it should return error "User is not logged in"', async () => {
@@ -541,7 +570,7 @@ describe('User Resolver', () => {
   });
 
   test('if update user with too short firstname and valid lastname then it should return Argument Validation Error', async () => {
-    expect.assertions(4);
+    expect.assertions(5);
 
     const response = await gCall({
       source: updateMeMutation,
@@ -553,10 +582,13 @@ describe('User Resolver', () => {
     expect(response.errors).not.toBeNull();
     expect(response.errors?.length).toEqual(1);
     expect(response.errors?.[0].message).toEqual('Argument Validation Error');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[0].constraints?.length
+    ).toEqual('firstname must be longer than or equal to 1 characters');
   });
 
   test('if update user with too long firstname and valid lastname then it should return Argument Validation Error', async () => {
-    expect.assertions(4);
+    expect.assertions(5);
 
     const response = await gCall({
       source: updateMeMutation,
@@ -568,10 +600,13 @@ describe('User Resolver', () => {
     expect(response.errors).not.toBeNull();
     expect(response.errors?.length).toEqual(1);
     expect(response.errors?.[0].message).toEqual('Argument Validation Error');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[0].constraints?.length
+    ).toEqual('firstname must be shorter than or equal to 32 characters');
   });
 
   test('if update user with valid firstname and too short lastname then it should return Argument Validation Error', async () => {
-    expect.assertions(4);
+    expect.assertions(5);
 
     const response = await gCall({
       source: updateMeMutation,
@@ -583,10 +618,13 @@ describe('User Resolver', () => {
     expect(response.errors).not.toBeNull();
     expect(response.errors?.length).toEqual(1);
     expect(response.errors?.[0].message).toEqual('Argument Validation Error');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[0].constraints?.length
+    ).toEqual('lastname must be longer than or equal to 1 characters');
   });
 
   test('if update user with valid firstname and too long lastname then it should return Argument Validation Error', async () => {
-    expect.assertions(4);
+    expect.assertions(5);
 
     const response = await gCall({
       source: updateMeMutation,
@@ -598,10 +636,13 @@ describe('User Resolver', () => {
     expect(response.errors).not.toBeNull();
     expect(response.errors?.length).toEqual(1);
     expect(response.errors?.[0].message).toEqual('Argument Validation Error');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[0].constraints?.length
+    ).toEqual('lastname must be shorter than or equal to 32 characters');
   });
 
   test('if update user with too short firstname and too short lastname then it should return Argument Validation Error', async () => {
-    expect.assertions(4);
+    expect.assertions(8);
 
     const response = await gCall({
       source: updateMeMutation,
@@ -613,10 +654,22 @@ describe('User Resolver', () => {
     expect(response.errors).not.toBeNull();
     expect(response.errors?.length).toEqual(1);
     expect(response.errors?.[0].message).toEqual('Argument Validation Error');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[0].constraints?.length
+    ).toEqual('firstname must be longer than or equal to 1 characters');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[1].constraints?.length
+    ).toEqual('lastname must be longer than or equal to 1 characters');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[0].constraints?.isAlpha
+    ).toEqual('firstname must contain only letters (a-zA-Z)');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[1].constraints?.isAlpha
+    ).toEqual('lastname must contain only letters (a-zA-Z)');
   });
 
   test('if update user with too long firstname and too long lastname then it should return Argument Validation Error', async () => {
-    expect.assertions(4);
+    expect.assertions(6);
 
     const response = await gCall({
       source: updateMeMutation,
@@ -628,10 +681,16 @@ describe('User Resolver', () => {
     expect(response.errors).not.toBeNull();
     expect(response.errors?.length).toEqual(1);
     expect(response.errors?.[0].message).toEqual('Argument Validation Error');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[0].constraints?.length
+    ).toEqual('firstname must be shorter than or equal to 32 characters');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[1].constraints?.length
+    ).toEqual('lastname must be shorter than or equal to 32 characters');
   });
 
   test('if update user with too short firstname and no lastname then it should return Argument Validation Error', async () => {
-    expect.assertions(4);
+    expect.assertions(5);
 
     const response = await gCall({
       source: updateMeMutation,
@@ -643,10 +702,13 @@ describe('User Resolver', () => {
     expect(response.errors).not.toBeNull();
     expect(response.errors?.length).toEqual(1);
     expect(response.errors?.[0].message).toEqual('Argument Validation Error');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[0].constraints?.length
+    ).toEqual('firstname must be longer than or equal to 1 characters');
   });
 
   test('if update user with too long firstname and no lastname then it should return Argument Validation Error', async () => {
-    expect.assertions(4);
+    expect.assertions(5);
 
     const response = await gCall({
       source: updateMeMutation,
@@ -658,10 +720,13 @@ describe('User Resolver', () => {
     expect(response.errors).not.toBeNull();
     expect(response.errors?.length).toEqual(1);
     expect(response.errors?.[0].message).toEqual('Argument Validation Error');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[0].constraints?.length
+    ).toEqual('firstname must be shorter than or equal to 32 characters');
   });
 
   test('if update user with no firstname and too short lastname then it should return Argument Validation Error', async () => {
-    expect.assertions(4);
+    expect.assertions(5);
 
     const response = await gCall({
       source: updateMeMutation,
@@ -673,10 +738,13 @@ describe('User Resolver', () => {
     expect(response.errors).not.toBeNull();
     expect(response.errors?.length).toEqual(1);
     expect(response.errors?.[0].message).toEqual('Argument Validation Error');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[0].constraints?.length
+    ).toEqual('lastname must be longer than or equal to 1 characters');
   });
 
   test('if update user with no firstname and too long lastname then it should return Argument Validation Error', async () => {
-    expect.assertions(4);
+    expect.assertions(5);
 
     const response = await gCall({
       source: updateMeMutation,
@@ -688,10 +756,13 @@ describe('User Resolver', () => {
     expect(response.errors).not.toBeNull();
     expect(response.errors?.length).toEqual(1);
     expect(response.errors?.[0].message).toEqual('Argument Validation Error');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[0].constraints?.length
+    ).toEqual('lastname must be shorter than or equal to 32 characters');
   });
 
   test('if update user with invalid firstname (numbers) and no lastname then it should return Argument Validation Error', async () => {
-    expect.assertions(4);
+    expect.assertions(5);
 
     const response = await gCall({
       source: updateMeMutation,
@@ -703,10 +774,13 @@ describe('User Resolver', () => {
     expect(response.errors).not.toBeNull();
     expect(response.errors?.length).toEqual(1);
     expect(response.errors?.[0].message).toEqual('Argument Validation Error');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[0].constraints?.isAlpha
+    ).toEqual('firstname must contain only letters (a-zA-Z)');
   });
 
   test('if update user with invalid firstname (special chars) and no lastname then it should return Argument Validation Error', async () => {
-    expect.assertions(4);
+    expect.assertions(5);
 
     const response = await gCall({
       source: updateMeMutation,
@@ -718,10 +792,13 @@ describe('User Resolver', () => {
     expect(response.errors).not.toBeNull();
     expect(response.errors?.length).toEqual(1);
     expect(response.errors?.[0].message).toEqual('Argument Validation Error');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[0].constraints?.isAlpha
+    ).toEqual('firstname must contain only letters (a-zA-Z)');
   });
 
   test('if update user with no firstname and invalid lastname (numbers) then it should return Argument Validation Error', async () => {
-    expect.assertions(4);
+    expect.assertions(5);
 
     const response = await gCall({
       source: updateMeMutation,
@@ -733,10 +810,13 @@ describe('User Resolver', () => {
     expect(response.errors).not.toBeNull();
     expect(response.errors?.length).toEqual(1);
     expect(response.errors?.[0].message).toEqual('Argument Validation Error');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[0].constraints?.isAlpha
+    ).toEqual('lastname must contain only letters (a-zA-Z)');
   });
 
   test('if update user with no firstname and invalid lastname (special chars) then it should return Argument Validation Error', async () => {
-    expect.assertions(4);
+    expect.assertions(5);
 
     const response = await gCall({
       source: updateMeMutation,
@@ -748,6 +828,9 @@ describe('User Resolver', () => {
     expect(response.errors).not.toBeNull();
     expect(response.errors?.length).toEqual(1);
     expect(response.errors?.[0].message).toEqual('Argument Validation Error');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[0].constraints?.isAlpha
+    ).toEqual('lastname must contain only letters (a-zA-Z)');
   });
 
   test('if update user on not logged in user with valid firstname and valid lastname then it should return error "User is not logged in"', async () => {
@@ -843,7 +926,7 @@ describe('User Resolver', () => {
   });
 
   test('if delete user with too short password then it should return Argument Validation Error', async () => {
-    expect.assertions(4);
+    expect.assertions(5);
 
     const response = await gCall({
       source: deleteMyAccountMutation,
@@ -855,10 +938,13 @@ describe('User Resolver', () => {
     expect(response.errors).not.toBeNull();
     expect(response.errors?.length).toEqual(1);
     expect(response.errors?.[0].message).toEqual('Argument Validation Error');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[0].constraints?.length
+    ).toEqual('password must be longer than or equal to 8 characters');
   });
 
   test('if delete user with too long password then it should return Argument Validation Error', async () => {
-    expect.assertions(4);
+    expect.assertions(5);
 
     const response = await gCall({
       source: deleteMyAccountMutation,
@@ -870,6 +956,9 @@ describe('User Resolver', () => {
     expect(response.errors).not.toBeNull();
     expect(response.errors?.length).toEqual(1);
     expect(response.errors?.[0].message).toEqual('Argument Validation Error');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[0].constraints?.length
+    ).toEqual('password must be shorter than or equal to 64 characters');
   });
 
   test('if delete user on not logged in user with random password then it should return error "User is not logged in"', async () => {

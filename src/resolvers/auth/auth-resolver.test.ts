@@ -4,6 +4,8 @@ import { testConnection } from '../../test_utils/test-database';
 import { gCall } from '../../test_utils/gCall';
 import { User } from '../../entities/user';
 import { generateEmail, generateName, generatePassword, generateUsername } from '../../test_utils/data-generator';
+import { Maybe } from 'graphql/jsutils/Maybe';
+import { ArgumentValidationError } from 'type-graphql';
 
 let conn: Connection;
 let userRepository: Repository<User>;
@@ -90,7 +92,7 @@ describe('Auth Resolver', () => {
   });
 
   test('if registering with a non-email then it should return Argument Validation Error', async () => {
-    expect.assertions(4);
+    expect.assertions(5);
 
     const user = {
       email: '',
@@ -109,6 +111,9 @@ describe('Auth Resolver', () => {
     expect(response.errors).not.toBeNull();
     expect(response.errors?.length).toEqual(1);
     expect(response.errors?.[0].message).toEqual('Argument Validation Error');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[0].constraints?.isEmail
+    ).toEqual('email must be an email');
   });
 
   test('if registering with an already used email then it should return Error "duplicate key value violates unique constraint"', async () => {
@@ -144,7 +149,7 @@ describe('Auth Resolver', () => {
   });
 
   test('if registering with a too short password then it should return Argument Validation Error', async () => {
-    expect.assertions(4);
+    expect.assertions(5);
 
     const user = {
       email: generateEmail(),
@@ -163,10 +168,13 @@ describe('Auth Resolver', () => {
     expect(response.errors).not.toBeNull();
     expect(response.errors?.length).toEqual(1);
     expect(response.errors?.[0].message).toEqual('Argument Validation Error');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[0].constraints?.length
+    ).toEqual('password must be longer than or equal to 8 characters');
   });
 
   test('if registering with a too long password then it should return Argument Validation Error', async () => {
-    expect.assertions(4);
+    expect.assertions(5);
 
     const user = {
       email: generateEmail(),
@@ -185,6 +193,9 @@ describe('Auth Resolver', () => {
     expect(response.errors).not.toBeNull();
     expect(response.errors?.length).toEqual(1);
     expect(response.errors?.[0].message).toEqual('Argument Validation Error');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[0].constraints?.length
+    ).toEqual('password must be shorter than or equal to 64 characters');
   });
 
   test('if registering with an username that has underscores then return user', async () => {
@@ -218,7 +229,7 @@ describe('Auth Resolver', () => {
   });
 
   test('if registering with a too long username then it should return Argument Validation Error', async () => {
-    expect.assertions(4);
+    expect.assertions(5);
 
     const user = {
       email: generateEmail(),
@@ -237,10 +248,13 @@ describe('Auth Resolver', () => {
     expect(response.errors).not.toBeNull();
     expect(response.errors?.length).toEqual(1);
     expect(response.errors?.[0].message).toEqual('Argument Validation Error');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[0].constraints?.length
+    ).toEqual('username must be shorter than or equal to 32 characters');
   });
 
   test('if registering with a too short username then it should return Argument Validation Error', async () => {
-    expect.assertions(4);
+    expect.assertions(5);
 
     const user = {
       email: generateEmail(),
@@ -259,10 +273,13 @@ describe('Auth Resolver', () => {
     expect(response.errors).not.toBeNull();
     expect(response.errors?.length).toEqual(1);
     expect(response.errors?.[0].message).toEqual('Argument Validation Error');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[0].constraints?.length
+    ).toEqual('username must be longer than or equal to 3 characters');
   });
 
   test('if registering with an invalid username (space) then it should return Argument Validation Error', async () => {
-    expect.assertions(4);
+    expect.assertions(5);
 
     const user = {
       email: generateEmail(),
@@ -281,10 +298,13 @@ describe('Auth Resolver', () => {
     expect(response.errors).not.toBeNull();
     expect(response.errors?.length).toEqual(1);
     expect(response.errors?.[0].message).toEqual('Argument Validation Error');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[0].constraints?.isUsername
+    ).toEqual('');
   });
 
   test('if registering with an invalid username (special chars) then it should return Argument Validation Error', async () => {
-    expect.assertions(4);
+    expect.assertions(5);
 
     const user = {
       email: generateEmail(),
@@ -303,10 +323,13 @@ describe('Auth Resolver', () => {
     expect(response.errors).not.toBeNull();
     expect(response.errors?.length).toEqual(1);
     expect(response.errors?.[0].message).toEqual('Argument Validation Error');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[0].constraints?.isUsername
+    ).toEqual('');
   });
 
   test('if registering with an invalid username (doesnt start with a char) then it should return Argument Validation Error', async () => {
-    expect.assertions(4);
+    expect.assertions(5);
 
     const user = {
       email: generateEmail(),
@@ -325,10 +348,13 @@ describe('Auth Resolver', () => {
     expect(response.errors).not.toBeNull();
     expect(response.errors?.length).toEqual(1);
     expect(response.errors?.[0].message).toEqual('Argument Validation Error');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[0].constraints?.isUsername
+    ).toEqual('');
   });
 
   test('if registering with a too short firstname then it should return Argument Validation Error', async () => {
-    expect.assertions(4);
+    expect.assertions(5);
 
     const user = {
       email: generateEmail(),
@@ -347,10 +373,13 @@ describe('Auth Resolver', () => {
     expect(response.errors).not.toBeNull();
     expect(response.errors?.length).toEqual(1);
     expect(response.errors?.[0].message).toEqual('Argument Validation Error');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[0].constraints?.length
+    ).toEqual('firstname must be longer than or equal to 1 characters');
   });
 
   test('if registering with a too long firstname then it should return Argument Validation Error', async () => {
-    expect.assertions(4);
+    expect.assertions(5);
 
     const user = {
       email: generateEmail(),
@@ -369,10 +398,13 @@ describe('Auth Resolver', () => {
     expect(response.errors).not.toBeNull();
     expect(response.errors?.length).toEqual(1);
     expect(response.errors?.[0].message).toEqual('Argument Validation Error');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[0].constraints?.length
+    ).toEqual('firstname must be shorter than or equal to 32 characters');
   });
 
   test('if registering with an invalid firstname (numbers) then it should return Argument Validation Error', async () => {
-    expect.assertions(4);
+    expect.assertions(5);
 
     const user = {
       email: generateEmail(),
@@ -391,10 +423,13 @@ describe('Auth Resolver', () => {
     expect(response.errors).not.toBeNull();
     expect(response.errors?.length).toEqual(1);
     expect(response.errors?.[0].message).toEqual('Argument Validation Error');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[0].constraints?.isAlpha
+    ).toEqual('firstname must contain only letters (a-zA-Z)');
   });
 
   test('if registering with an invalid firstname (special chars) then it should return Argument Validation Error', async () => {
-    expect.assertions(4);
+    expect.assertions(5);
 
     const user = {
       email: generateEmail(),
@@ -413,10 +448,13 @@ describe('Auth Resolver', () => {
     expect(response.errors).not.toBeNull();
     expect(response.errors?.length).toEqual(1);
     expect(response.errors?.[0].message).toEqual('Argument Validation Error');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[0].constraints?.isAlpha
+    ).toEqual('firstname must contain only letters (a-zA-Z)');
   });
 
   test('if registering with a too short lastname then it should return Argument Validation Error', async () => {
-    expect.assertions(4);
+    expect.assertions(5);
 
     const user = {
       email: generateEmail(),
@@ -435,10 +473,13 @@ describe('Auth Resolver', () => {
     expect(response.errors).not.toBeNull();
     expect(response.errors?.length).toEqual(1);
     expect(response.errors?.[0].message).toEqual('Argument Validation Error');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[0].constraints?.length
+    ).toEqual('lastname must be longer than or equal to 1 characters');
   });
 
   test('if registering with a too long lastname then it should return Argument Validation Error', async () => {
-    expect.assertions(4);
+    expect.assertions(5);
 
     const user = {
       email: generateEmail(),
@@ -457,10 +498,13 @@ describe('Auth Resolver', () => {
     expect(response.errors).not.toBeNull();
     expect(response.errors?.length).toEqual(1);
     expect(response.errors?.[0].message).toEqual('Argument Validation Error');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[0].constraints?.length
+    ).toEqual('lastname must be shorter than or equal to 32 characters');
   });
 
   test('if registering with an invalid lastname (numbers) then it should return Argument Validation Error', async () => {
-    expect.assertions(4);
+    expect.assertions(5);
 
     const user = {
       email: generateEmail(),
@@ -479,10 +523,13 @@ describe('Auth Resolver', () => {
     expect(response.errors).not.toBeNull();
     expect(response.errors?.length).toEqual(1);
     expect(response.errors?.[0].message).toEqual('Argument Validation Error');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[0].constraints?.isAlpha
+    ).toEqual('lastname must contain only letters (a-zA-Z)');
   });
 
   test('if registering with an invalid lastname (special chars) then it should return Argument Validation Error', async () => {
-    expect.assertions(4);
+    expect.assertions(5);
 
     const user = {
       email: generateEmail(),
@@ -501,6 +548,9 @@ describe('Auth Resolver', () => {
     expect(response.errors).not.toBeNull();
     expect(response.errors?.length).toEqual(1);
     expect(response.errors?.[0].message).toEqual('Argument Validation Error');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[0].constraints?.isAlpha
+    ).toEqual('lastname must contain only letters (a-zA-Z)');
   });
 
   test('if login with correct email and password then it should return user', async () => {
@@ -574,7 +624,7 @@ describe('Auth Resolver', () => {
   });
 
   test('if login with invalid email then it should return Argument Validation Error', async () => {
-    expect.assertions(4);
+    expect.assertions(5);
 
     const response = await gCall({
       source: loginMutation,
@@ -590,6 +640,9 @@ describe('Auth Resolver', () => {
     expect(response.errors).not.toBeNull();
     expect(response.errors?.length).toEqual(1);
     expect(response.errors?.[0].message).toEqual('Argument Validation Error');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[0].constraints?.isEmail
+    ).toEqual('email must be an email');
   });
 
   test('if login with incorrect password then it should return error "Email or Password is invalid"', async () => {
@@ -624,7 +677,7 @@ describe('Auth Resolver', () => {
   });
 
   test('if login with too short password then it should return Argument Validation Error', async () => {
-    expect.assertions(4);
+    expect.assertions(5);
 
     const response = await gCall({
       source: loginMutation,
@@ -640,10 +693,13 @@ describe('Auth Resolver', () => {
     expect(response.errors).not.toBeNull();
     expect(response.errors?.length).toEqual(1);
     expect(response.errors?.[0].message).toEqual('Argument Validation Error');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[0].constraints?.length
+    ).toEqual('password must be longer than or equal to 8 characters');
   });
 
   test('if login with too long password then it should return Argument Validation Error', async () => {
-    expect.assertions(4);
+    expect.assertions(5);
 
     const response = await gCall({
       source: loginMutation,
@@ -659,6 +715,9 @@ describe('Auth Resolver', () => {
     expect(response.errors).not.toBeNull();
     expect(response.errors?.length).toEqual(1);
     expect(response.errors?.[0].message).toEqual('Argument Validation Error');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[0].constraints?.length
+    ).toEqual('password must be shorter than or equal to 64 characters');
   });
 
   test('if logged in user gets Me data then return user', async () => {
