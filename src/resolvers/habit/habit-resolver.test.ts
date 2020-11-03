@@ -1,4 +1,6 @@
 import { Connection, Repository } from 'typeorm';
+import { Maybe } from 'graphql/jsutils/Maybe';
+import { ArgumentValidationError } from 'type-graphql';
 
 import { testConnection } from '../../test_utils/test-database';
 import { gCall } from '../../test_utils/gCall';
@@ -76,6 +78,21 @@ const removeHabitMutation = `
     }
   }
 `;
+
+const updateHabitMutation = `
+  mutation UpdateHabit($data: UpdateHabitInput!) {
+    updateHabit(data:$data) {
+      habit {
+        id
+        title
+        description
+        startDate
+      }
+    }
+  } 
+`;
+
+// console.log((<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[0].constraints);
 
 describe('Habit Resolver', () => {
   test('if user adds habit with valid title, valid description and valid startDate then it should return created habit', async () => {
@@ -665,5 +682,1025 @@ describe('Habit Resolver', () => {
     expect(response.errors).not.toBeNull();
     expect(response.errors?.length).toEqual(1);
     expect(response.errors?.[0].message).toContain('Could not find any entity of type "User"');
+  });
+
+  test('if user updates habit he owns with valid title, valid description and valid startDate then it should return updated habit', async () => {
+    expect.assertions(1);
+
+    const title = 'Dancing KPOP';
+    const description = 'Dancing KPOP songs for atleast 60 minutes';
+    const startDate = '2020-02-07T21:04:39.573Z';
+
+    const habit = habitRepository.create({
+      title: generateTitle(),
+      description: generateDescription(),
+      startDate: generateDate().toISOString()
+    });
+    const savedHabit = await habitRepository.save(habit);
+
+    const user = userRepository.create({
+      email: generateEmail(),
+      password: generatePassword(),
+      username: generateUsername(),
+      firstname: generateName(),
+      lastname: generateName(),
+      habits: [habit]
+    });
+    await userRepository.save(user);
+
+    const response = await gCall({
+      source: updateHabitMutation,
+      username: user.username,
+      variableValues: {
+        data: {
+          id: savedHabit.id,
+          title: title,
+          description: description,
+          startDate: startDate
+        }
+      }
+    });
+
+    expect(response).toMatchObject({
+      data: {
+        updateHabit: {
+          habit: {
+            id: savedHabit.id.toString(),
+            title: title,
+            description: description,
+            startDate: startDate
+          }
+        }
+      }
+    });
+  });
+
+  test('if user updates habit he owns with only valid title then it should return updated habit', async () => {
+    expect.assertions(1);
+
+    const title = 'Dancing KPOP';
+
+    const habit = habitRepository.create({
+      title: generateTitle(),
+      description: generateDescription(),
+      startDate: generateDate().toISOString()
+    });
+    const savedHabit = await habitRepository.save(habit);
+
+    const user = userRepository.create({
+      email: generateEmail(),
+      password: generatePassword(),
+      username: generateUsername(),
+      firstname: generateName(),
+      lastname: generateName(),
+      habits: [habit]
+    });
+    await userRepository.save(user);
+
+    const response = await gCall({
+      source: updateHabitMutation,
+      username: user.username,
+      variableValues: {
+        data: {
+          id: savedHabit.id,
+          title: title
+        }
+      }
+    });
+
+    expect(response).toMatchObject({
+      data: {
+        updateHabit: {
+          habit: {
+            id: savedHabit.id.toString(),
+            title: title,
+            description: savedHabit.description,
+            startDate: savedHabit.startDate
+          }
+        }
+      }
+    });
+  });
+
+  test('if user updates habit he owns with only valid description then it should return updated habit', async () => {
+    expect.assertions(1);
+
+    const description = 'Dancing KPOP songs for atleast 60 minutes';
+
+    const habit = habitRepository.create({
+      title: generateTitle(),
+      description: generateDescription(),
+      startDate: generateDate().toISOString()
+    });
+    const savedHabit = await habitRepository.save(habit);
+
+    const user = userRepository.create({
+      email: generateEmail(),
+      password: generatePassword(),
+      username: generateUsername(),
+      firstname: generateName(),
+      lastname: generateName(),
+      habits: [habit]
+    });
+    await userRepository.save(user);
+
+    const response = await gCall({
+      source: updateHabitMutation,
+      username: user.username,
+      variableValues: {
+        data: {
+          id: savedHabit.id,
+          description: description
+        }
+      }
+    });
+
+    expect(response).toMatchObject({
+      data: {
+        updateHabit: {
+          habit: {
+            id: savedHabit.id.toString(),
+            title: savedHabit.title,
+            description: description,
+            startDate: savedHabit.startDate
+          }
+        }
+      }
+    });
+  });
+
+  test('if user updates habit he owns with only valid startDate then it should return updated habit', async () => {
+    expect.assertions(1);
+
+    const startDate = '2020-02-07T21:04:39.573Z';
+
+    const habit = habitRepository.create({
+      title: generateTitle(),
+      description: generateDescription(),
+      startDate: generateDate().toISOString()
+    });
+    const savedHabit = await habitRepository.save(habit);
+
+    const user = userRepository.create({
+      email: generateEmail(),
+      password: generatePassword(),
+      username: generateUsername(),
+      firstname: generateName(),
+      lastname: generateName(),
+      habits: [habit]
+    });
+    await userRepository.save(user);
+
+    const response = await gCall({
+      source: updateHabitMutation,
+      username: user.username,
+      variableValues: {
+        data: {
+          id: savedHabit.id,
+          startDate: startDate
+        }
+      }
+    });
+
+    expect(response).toMatchObject({
+      data: {
+        updateHabit: {
+          habit: {
+            id: savedHabit.id.toString(),
+            title: savedHabit.title,
+            description: savedHabit.description,
+            startDate: startDate
+          }
+        }
+      }
+    });
+  });
+
+  test('if user updates habit he owns with no title, no description and no startDate then it should return unchanged habit', async () => {
+    expect.assertions(1);
+
+    const habit = habitRepository.create({
+      title: generateTitle(),
+      description: generateDescription(),
+      startDate: generateDate().toISOString()
+    });
+    const savedHabit = await habitRepository.save(habit);
+
+    const user = userRepository.create({
+      email: generateEmail(),
+      password: generatePassword(),
+      username: generateUsername(),
+      firstname: generateName(),
+      lastname: generateName(),
+      habits: [habit]
+    });
+    await userRepository.save(user);
+
+    const response = await gCall({
+      source: updateHabitMutation,
+      username: user.username,
+      variableValues: {
+        data: {
+          id: savedHabit.id
+        }
+      }
+    });
+
+    expect(response).toMatchObject({
+      data: {
+        updateHabit: {
+          habit: {
+            id: savedHabit.id.toString(),
+            title: savedHabit.title,
+            description: savedHabit.description,
+            startDate: savedHabit.startDate
+          }
+        }
+      }
+    });
+  });
+
+  test('if user updates habit he owns with too long title, valid description and valid startDate then it should return updated habit', async () => {
+    expect.assertions(5);
+
+    const habit = habitRepository.create({
+      title: generateTitle(),
+      description: generateDescription(),
+      startDate: generateDate().toISOString()
+    });
+    const savedHabit = await habitRepository.save(habit);
+
+    const user = userRepository.create({
+      email: generateEmail(),
+      password: generatePassword(),
+      username: generateUsername(),
+      firstname: generateName(),
+      lastname: generateName(),
+      habits: [habit]
+    });
+    await userRepository.save(user);
+
+    const response = await gCall({
+      source: updateHabitMutation,
+      username: user.username,
+      variableValues: {
+        data: {
+          id: savedHabit.id,
+          title: generateTitle(65),
+          description: generateDescription(),
+          startDate: generateDate().toISOString()
+        }
+      }
+    });
+
+    expect(response.data).toBeNull();
+    expect(response.errors).not.toBeNull();
+    expect(response.errors?.length).toEqual(1);
+    expect(response.errors?.[0].message).toEqual('Argument Validation Error');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[0].constraints?.maxLength
+    ).toEqual('title must be shorter than or equal to 64 characters');
+  });
+
+  test('if user updates habit he owns with too long title, no description and valid startDate then it should return updated habit', async () => {
+    expect.assertions(5);
+
+    const habit = habitRepository.create({
+      title: generateTitle(),
+      description: generateDescription(),
+      startDate: generateDate().toISOString()
+    });
+    const savedHabit = await habitRepository.save(habit);
+
+    const user = userRepository.create({
+      email: generateEmail(),
+      password: generatePassword(),
+      username: generateUsername(),
+      firstname: generateName(),
+      lastname: generateName(),
+      habits: [habit]
+    });
+    await userRepository.save(user);
+
+    const response = await gCall({
+      source: updateHabitMutation,
+      username: user.username,
+      variableValues: {
+        data: {
+          id: savedHabit.id,
+          title: generateTitle(65),
+          startDate: generateDate().toISOString()
+        }
+      }
+    });
+
+    expect(response.data).toBeNull();
+    expect(response.errors).not.toBeNull();
+    expect(response.errors?.length).toEqual(1);
+    expect(response.errors?.[0].message).toEqual('Argument Validation Error');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[0].constraints?.maxLength
+    ).toEqual('title must be shorter than or equal to 64 characters');
+  });
+
+  test('if user updates habit he owns with too long title, no description and no startDate then it should return updated habit', async () => {
+    expect.assertions(5);
+
+    const habit = habitRepository.create({
+      title: generateTitle(),
+      description: generateDescription(),
+      startDate: generateDate().toISOString()
+    });
+    const savedHabit = await habitRepository.save(habit);
+
+    const user = userRepository.create({
+      email: generateEmail(),
+      password: generatePassword(),
+      username: generateUsername(),
+      firstname: generateName(),
+      lastname: generateName(),
+      habits: [habit]
+    });
+    await userRepository.save(user);
+
+    const response = await gCall({
+      source: updateHabitMutation,
+      username: user.username,
+      variableValues: {
+        data: {
+          id: savedHabit.id,
+          title: generateTitle(65)
+        }
+      }
+    });
+
+    expect(response.data).toBeNull();
+    expect(response.errors).not.toBeNull();
+    expect(response.errors?.length).toEqual(1);
+    expect(response.errors?.[0].message).toEqual('Argument Validation Error');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[0].constraints?.maxLength
+    ).toEqual('title must be shorter than or equal to 64 characters');
+  });
+
+  test('if user updates habit he owns with too long title, valid description and no startDate then it should return updated habit', async () => {
+    expect.assertions(5);
+
+    const habit = habitRepository.create({
+      title: generateTitle(),
+      description: generateDescription(),
+      startDate: generateDate().toISOString()
+    });
+    const savedHabit = await habitRepository.save(habit);
+
+    const user = userRepository.create({
+      email: generateEmail(),
+      password: generatePassword(),
+      username: generateUsername(),
+      firstname: generateName(),
+      lastname: generateName(),
+      habits: [habit]
+    });
+    await userRepository.save(user);
+
+    const response = await gCall({
+      source: updateHabitMutation,
+      username: user.username,
+      variableValues: {
+        data: {
+          id: savedHabit.id,
+          title: generateTitle(65),
+          description: generateDescription()
+        }
+      }
+    });
+
+    expect(response.data).toBeNull();
+    expect(response.errors).not.toBeNull();
+    expect(response.errors?.length).toEqual(1);
+    expect(response.errors?.[0].message).toEqual('Argument Validation Error');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[0].constraints?.maxLength
+    ).toEqual('title must be shorter than or equal to 64 characters');
+  });
+
+  test('if user updates habit he owns with valid title, too long description and valid startDate then it should return updated habit', async () => {
+    expect.assertions(5);
+
+    const habit = habitRepository.create({
+      title: generateTitle(),
+      description: generateDescription(),
+      startDate: generateDate().toISOString()
+    });
+    const savedHabit = await habitRepository.save(habit);
+
+    const user = userRepository.create({
+      email: generateEmail(),
+      password: generatePassword(),
+      username: generateUsername(),
+      firstname: generateName(),
+      lastname: generateName(),
+      habits: [habit]
+    });
+    await userRepository.save(user);
+
+    const response = await gCall({
+      source: updateHabitMutation,
+      username: user.username,
+      variableValues: {
+        data: {
+          id: savedHabit.id,
+          title: generateTitle(),
+          description: generateDescription(256),
+          startDate: generateDate().toISOString()
+        }
+      }
+    });
+
+    expect(response.data).toBeNull();
+    expect(response.errors).not.toBeNull();
+    expect(response.errors?.length).toEqual(1);
+    expect(response.errors?.[0].message).toEqual('Argument Validation Error');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[0].constraints?.maxLength
+    ).toEqual('description must be shorter than or equal to 255 characters');
+  });
+
+  test('if user updates habit he owns with valid title, too long description and no startDate then it should return updated habit', async () => {
+    expect.assertions(5);
+
+    const habit = habitRepository.create({
+      title: generateTitle(),
+      description: generateDescription(),
+      startDate: generateDate().toISOString()
+    });
+    const savedHabit = await habitRepository.save(habit);
+
+    const user = userRepository.create({
+      email: generateEmail(),
+      password: generatePassword(),
+      username: generateUsername(),
+      firstname: generateName(),
+      lastname: generateName(),
+      habits: [habit]
+    });
+    await userRepository.save(user);
+
+    const response = await gCall({
+      source: updateHabitMutation,
+      username: user.username,
+      variableValues: {
+        data: {
+          id: savedHabit.id,
+          title: generateTitle(),
+          description: generateDescription(256)
+        }
+      }
+    });
+
+    expect(response.data).toBeNull();
+    expect(response.errors).not.toBeNull();
+    expect(response.errors?.length).toEqual(1);
+    expect(response.errors?.[0].message).toEqual('Argument Validation Error');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[0].constraints?.maxLength
+    ).toEqual('description must be shorter than or equal to 255 characters');
+  });
+
+  test('if user updates habit he owns with no title, too long description and valid startDate then it should return updated habit', async () => {
+    expect.assertions(5);
+
+    const habit = habitRepository.create({
+      title: generateTitle(),
+      description: generateDescription(),
+      startDate: generateDate().toISOString()
+    });
+    const savedHabit = await habitRepository.save(habit);
+
+    const user = userRepository.create({
+      email: generateEmail(),
+      password: generatePassword(),
+      username: generateUsername(),
+      firstname: generateName(),
+      lastname: generateName(),
+      habits: [habit]
+    });
+    await userRepository.save(user);
+
+    const response = await gCall({
+      source: updateHabitMutation,
+      username: user.username,
+      variableValues: {
+        data: {
+          id: savedHabit.id,
+          description: generateDescription(256),
+          startDate: generateDate().toISOString()
+        }
+      }
+    });
+
+    expect(response.data).toBeNull();
+    expect(response.errors).not.toBeNull();
+    expect(response.errors?.length).toEqual(1);
+    expect(response.errors?.[0].message).toEqual('Argument Validation Error');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[0].constraints?.maxLength
+    ).toEqual('description must be shorter than or equal to 255 characters');
+  });
+
+  test('if user updates habit he owns with no title, too long description and no startDate then it should return updated habit', async () => {
+    expect.assertions(5);
+
+    const habit = habitRepository.create({
+      title: generateTitle(),
+      description: generateDescription(),
+      startDate: generateDate().toISOString()
+    });
+    const savedHabit = await habitRepository.save(habit);
+
+    const user = userRepository.create({
+      email: generateEmail(),
+      password: generatePassword(),
+      username: generateUsername(),
+      firstname: generateName(),
+      lastname: generateName(),
+      habits: [habit]
+    });
+    await userRepository.save(user);
+
+    const response = await gCall({
+      source: updateHabitMutation,
+      username: user.username,
+      variableValues: {
+        data: {
+          id: savedHabit.id,
+          description: generateDescription(256)
+        }
+      }
+    });
+
+    expect(response.data).toBeNull();
+    expect(response.errors).not.toBeNull();
+    expect(response.errors?.length).toEqual(1);
+    expect(response.errors?.[0].message).toEqual('Argument Validation Error');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[0].constraints?.maxLength
+    ).toEqual('description must be shorter than or equal to 255 characters');
+  });
+
+  test('if user updates habit he owns with valid title, valid description and invalid startDate then it should return updated habit', async () => {
+    expect.assertions(4);
+
+    const habit = habitRepository.create({
+      title: generateTitle(),
+      description: generateDescription(),
+      startDate: generateDate().toISOString()
+    });
+    const savedHabit = await habitRepository.save(habit);
+
+    const user = userRepository.create({
+      email: generateEmail(),
+      password: generatePassword(),
+      username: generateUsername(),
+      firstname: generateName(),
+      lastname: generateName(),
+      habits: [habit]
+    });
+    await userRepository.save(user);
+
+    const response = await gCall({
+      source: updateHabitMutation,
+      username: user.username,
+      variableValues: {
+        data: {
+          id: savedHabit.id,
+          title: generateTitle(),
+          description: generateDescription(),
+          startDate: 'invalid date'
+        }
+      }
+    });
+
+    expect(response.data).toBeNull();
+    expect(response.errors).not.toBeNull();
+    expect(response.errors?.length).toEqual(1);
+    expect(response.errors?.[0].message).toContain('invalid input syntax for type timestamp');
+  });
+
+  test('if user updates habit he owns with valid title, no description and invalid startDate then it should return updated habit', async () => {
+    expect.assertions(4);
+
+    const habit = habitRepository.create({
+      title: generateTitle(),
+      description: generateDescription(),
+      startDate: generateDate().toISOString()
+    });
+    const savedHabit = await habitRepository.save(habit);
+
+    const user = userRepository.create({
+      email: generateEmail(),
+      password: generatePassword(),
+      username: generateUsername(),
+      firstname: generateName(),
+      lastname: generateName(),
+      habits: [habit]
+    });
+    await userRepository.save(user);
+
+    const response = await gCall({
+      source: updateHabitMutation,
+      username: user.username,
+      variableValues: {
+        data: {
+          id: savedHabit.id,
+          title: generateTitle(),
+          startDate: 'invalid date'
+        }
+      }
+    });
+
+    expect(response.data).toBeNull();
+    expect(response.errors).not.toBeNull();
+    expect(response.errors?.length).toEqual(1);
+    expect(response.errors?.[0].message).toContain('invalid input syntax for type timestamp');
+  });
+
+  test('if user updates habit he owns with no title, valid description and invalid startDate then it should return updated habit', async () => {
+    expect.assertions(4);
+
+    const habit = habitRepository.create({
+      title: generateTitle(),
+      description: generateDescription(),
+      startDate: generateDate().toISOString()
+    });
+    const savedHabit = await habitRepository.save(habit);
+
+    const user = userRepository.create({
+      email: generateEmail(),
+      password: generatePassword(),
+      username: generateUsername(),
+      firstname: generateName(),
+      lastname: generateName(),
+      habits: [habit]
+    });
+    await userRepository.save(user);
+
+    const response = await gCall({
+      source: updateHabitMutation,
+      username: user.username,
+      variableValues: {
+        data: {
+          id: savedHabit.id,
+          description: generateDescription(),
+          startDate: 'invalid date'
+        }
+      }
+    });
+
+    expect(response.data).toBeNull();
+    expect(response.errors).not.toBeNull();
+    expect(response.errors?.length).toEqual(1);
+    expect(response.errors?.[0].message).toContain('invalid input syntax for type timestamp');
+  });
+
+  test('if user updates habit he owns with no title, no description and invalid startDate then it should return updated habit', async () => {
+    expect.assertions(4);
+
+    const habit = habitRepository.create({
+      title: generateTitle(),
+      description: generateDescription(),
+      startDate: generateDate().toISOString()
+    });
+    const savedHabit = await habitRepository.save(habit);
+
+    const user = userRepository.create({
+      email: generateEmail(),
+      password: generatePassword(),
+      username: generateUsername(),
+      firstname: generateName(),
+      lastname: generateName(),
+      habits: [habit]
+    });
+    await userRepository.save(user);
+
+    const response = await gCall({
+      source: updateHabitMutation,
+      username: user.username,
+      variableValues: {
+        data: {
+          id: savedHabit.id,
+          startDate: 'invalid date'
+        }
+      }
+    });
+
+    expect(response.data).toBeNull();
+    expect(response.errors).not.toBeNull();
+    expect(response.errors?.length).toEqual(1);
+    expect(response.errors?.[0].message).toContain('invalid input syntax for type timestamp');
+  });
+
+  test('if user updates habit he owns with too long title, too long description and valid startDate then it should return updated habit', async () => {
+    expect.assertions(6);
+
+    const startDate = '2020-02-07T21:04:39.573Z';
+
+    const habit = habitRepository.create({
+      title: generateTitle(),
+      description: generateDescription(),
+      startDate: generateDate().toISOString()
+    });
+    const savedHabit = await habitRepository.save(habit);
+
+    const user = userRepository.create({
+      email: generateEmail(),
+      password: generatePassword(),
+      username: generateUsername(),
+      firstname: generateName(),
+      lastname: generateName(),
+      habits: [habit]
+    });
+    await userRepository.save(user);
+
+    const response = await gCall({
+      source: updateHabitMutation,
+      username: user.username,
+      variableValues: {
+        data: {
+          id: savedHabit.id,
+          title: generateTitle(65),
+          description: generateDescription(256),
+          startDate: startDate
+        }
+      }
+    });
+
+    expect(response.data).toBeNull();
+    expect(response.errors).not.toBeNull();
+    expect(response.errors?.length).toEqual(1);
+    expect(response.errors?.[0].message).toEqual('Argument Validation Error');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[0].constraints?.maxLength
+    ).toEqual('title must be shorter than or equal to 64 characters');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[1].constraints?.maxLength
+    ).toEqual('description must be shorter than or equal to 255 characters');
+  });
+
+  test('if user updates habit he owns with too long title, too long description and invalid startDate then it should return updated habit', async () => {
+    expect.assertions(6);
+
+    const habit = habitRepository.create({
+      title: generateTitle(),
+      description: generateDescription(),
+      startDate: generateDate().toISOString()
+    });
+    const savedHabit = await habitRepository.save(habit);
+
+    const user = userRepository.create({
+      email: generateEmail(),
+      password: generatePassword(),
+      username: generateUsername(),
+      firstname: generateName(),
+      lastname: generateName(),
+      habits: [habit]
+    });
+    await userRepository.save(user);
+
+    const response = await gCall({
+      source: updateHabitMutation,
+      username: user.username,
+      variableValues: {
+        data: {
+          id: savedHabit.id,
+          title: generateTitle(65),
+          description: generateDescription(256),
+          startDate: 'invalid date'
+        }
+      }
+    });
+
+    expect(response.data).toBeNull();
+    expect(response.errors).not.toBeNull();
+    expect(response.errors?.length).toEqual(1);
+    expect(response.errors?.[0].message).toEqual('Argument Validation Error');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[0].constraints?.maxLength
+    ).toEqual('title must be shorter than or equal to 64 characters');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[1].constraints?.maxLength
+    ).toEqual('description must be shorter than or equal to 255 characters');
+  });
+
+  test('if user updates habit he owns with too long title, valid description and invalid startDate then it should return updated habit', async () => {
+    expect.assertions(5);
+
+    const habit = habitRepository.create({
+      title: generateTitle(),
+      description: generateDescription(),
+      startDate: generateDate().toISOString()
+    });
+    const savedHabit = await habitRepository.save(habit);
+
+    const user = userRepository.create({
+      email: generateEmail(),
+      password: generatePassword(),
+      username: generateUsername(),
+      firstname: generateName(),
+      lastname: generateName(),
+      habits: [habit]
+    });
+    await userRepository.save(user);
+
+    const response = await gCall({
+      source: updateHabitMutation,
+      username: user.username,
+      variableValues: {
+        data: {
+          id: savedHabit.id,
+          title: generateTitle(65),
+          description: generateDescription(),
+          startDate: 'invalid date'
+        }
+      }
+    });
+
+    expect(response.data).toBeNull();
+    expect(response.errors).not.toBeNull();
+    expect(response.errors?.length).toEqual(1);
+    expect(response.errors?.[0].message).toEqual('Argument Validation Error');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[0].constraints?.maxLength
+    ).toEqual('title must be shorter than or equal to 64 characters');
+  });
+
+  test('if user updates habit he owns with valid title, too long description and invalid startDate then it should return updated habit', async () => {
+    expect.assertions(5);
+
+    const habit = habitRepository.create({
+      title: generateTitle(),
+      description: generateDescription(),
+      startDate: generateDate().toISOString()
+    });
+    const savedHabit = await habitRepository.save(habit);
+
+    const user = userRepository.create({
+      email: generateEmail(),
+      password: generatePassword(),
+      username: generateUsername(),
+      firstname: generateName(),
+      lastname: generateName(),
+      habits: [habit]
+    });
+    await userRepository.save(user);
+
+    const response = await gCall({
+      source: updateHabitMutation,
+      username: user.username,
+      variableValues: {
+        data: {
+          id: savedHabit.id,
+          title: generateTitle(),
+          description: generateDescription(256),
+          startDate: 'invalid date'
+        }
+      }
+    });
+
+    expect(response.data).toBeNull();
+    expect(response.errors).not.toBeNull();
+    expect(response.errors?.length).toEqual(1);
+    expect(response.errors?.[0].message).toEqual('Argument Validation Error');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[0].constraints?.maxLength
+    ).toEqual('description must be shorter than or equal to 255 characters');
+  });
+
+  test('if user updates habit he doesnt own with valid title, valid description and valid startDate then it should return updated habit', async () => {
+    expect.assertions(4);
+
+    const title = 'Dancing KPOP';
+    const description = 'Dancing KPOP songs for atleast 60 minutes';
+    const startDate = '2020-02-07T21:04:39.573Z';
+
+    const habit = habitRepository.create({
+      title: generateTitle(),
+      description: generateDescription(),
+      startDate: generateDate().toISOString()
+    });
+    const savedHabit = await habitRepository.save(habit);
+
+    const user = userRepository.create({
+      email: generateEmail(),
+      password: generatePassword(),
+      username: generateUsername(),
+      firstname: generateName(),
+      lastname: generateName(),
+      habits: []
+    });
+    await userRepository.save(user);
+
+    const response = await gCall({
+      source: updateHabitMutation,
+      username: user.username,
+      variableValues: {
+        data: {
+          id: savedHabit.id,
+          title: title,
+          description: description,
+          startDate: startDate
+        }
+      }
+    });
+
+    expect(response.data).toBeNull();
+    expect(response.errors).not.toBeNull();
+    expect(response.errors?.length).toEqual(1);
+    expect(response.errors?.[0].message).toEqual(`Habit with the ID ${savedHabit.id} does not exist`);
+  });
+
+  test('if user updates habit he doesnt own with too long title, valid description and valid startDate then it should return updated habit', async () => {
+    expect.assertions(4);
+
+    const description = 'Dancing KPOP songs for atleast 60 minutes';
+    const startDate = '2020-02-07T21:04:39.573Z';
+
+    const habit = habitRepository.create({
+      title: generateTitle(),
+      description: generateDescription(),
+      startDate: generateDate().toISOString()
+    });
+    const savedHabit = await habitRepository.save(habit);
+
+    const user = userRepository.create({
+      email: generateEmail(),
+      password: generatePassword(),
+      username: generateUsername(),
+      firstname: generateName(),
+      lastname: generateName(),
+      habits: []
+    });
+    await userRepository.save(user);
+
+    const response = await gCall({
+      source: updateHabitMutation,
+      username: user.username,
+      variableValues: {
+        data: {
+          id: savedHabit.id,
+          title: generateTitle(65),
+          description: description,
+          startDate: startDate
+        }
+      }
+    });
+
+    expect(response.data).toBeNull();
+    expect(response.errors).not.toBeNull();
+    expect(response.errors?.length).toEqual(1);
+    expect(response.errors?.[0].message).toEqual(`Habit with the ID ${savedHabit.id} does not exist`);
+  });
+
+  test('if user updates habit when he is not logged in with valid title, valid description and valid startDate and then it should return error "User is not logged in"', async () => {
+    expect.assertions(4);
+
+    const response = await gCall({
+      source: updateHabitMutation,
+      variableValues: {
+        data: {
+          id: 999,
+          title: generateTitle(),
+          description: generateDescription(),
+          startDate: generateDate().toISOString()
+        }
+      }
+    });
+
+    expect(response.data).toBeNull();
+    expect(response.errors).not.toBeNull();
+    expect(response.errors?.length).toEqual(1);
+    expect(response.errors?.[0].message).toContain('User is not logged in');
+  });
+
+  test('if user who doesnt exist updates habit with valid title, valid description and valid startDate and then it should return error "Could not find any entity of type"', async () => {
+    expect.assertions(4);
+
+    const response = await gCall({
+      source: updateHabitMutation,
+      username: 'userdoesntexist',
+      variableValues: {
+        data: {
+          id: 999,
+          title: generateTitle(),
+          description: generateDescription(),
+          startDate: generateDate().toISOString()
+        }
+      }
+    });
+
+    expect(response.data).toBeNull();
+    expect(response.errors).not.toBeNull();
+    expect(response.errors?.length).toEqual(1);
+    expect(response.errors?.[0].message).toContain('Could not find any entity of type');
   });
 });

@@ -7,8 +7,8 @@ import { User } from '../../entities/user';
 import { Authenticated } from '../../middlewares/authenticated';
 import { HabitOwner } from '../../middlewares/habitOwner';
 import { Context } from '../../types/context.interface';
-import { AddHabitInput, HabitInput, RemoveHabitInput } from './habit-input';
-import { AddHabitPayload, RemoveHabitPayload } from './habit-types';
+import { AddHabitInput, HabitInput, RemoveHabitInput, UpdateHabitInput } from './habit-input';
+import { AddHabitPayload, RemoveHabitPayload, UpdateHabitPayload } from './habit-types';
 
 @Resolver(Habit)
 export class HabitResolver {
@@ -55,6 +55,32 @@ export class HabitResolver {
     deletedHabit.id = data.id;
 
     return { habit: deletedHabit };
+  }
+
+  @Mutation(() => UpdateHabitPayload)
+  @UseMiddleware(Authenticated, HabitOwner)
+  async updateHabit(@Arg('data') data: UpdateHabitInput): Promise<UpdateHabitPayload> {
+    const habit = await this.habitRepository.findOneOrFail(data.id);
+
+    if (!data.title && !data.description && !data.startDate) {
+      return { habit };
+    }
+
+    if (data.title) {
+      habit.title = data.title;
+    }
+
+    if (data.description) {
+      habit.description = data.description;
+    }
+
+    if (data.startDate) {
+      habit.startDate = data.startDate;
+    }
+
+    await this.habitRepository.save(habit);
+
+    return { habit };
   }
 
   @FieldResolver()

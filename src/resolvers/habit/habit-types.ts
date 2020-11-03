@@ -12,3 +12,9 @@ export class RemoveHabitPayload {
   @Field()
   habit: Habit;
 }
+
+@ObjectType()
+export class UpdateHabitPayload {
+  @Field()
+  habit: Habit;
+}

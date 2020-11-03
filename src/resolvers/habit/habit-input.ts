@@ -27,3 +27,20 @@ export class HabitInput implements Partial<Habit> {
   @Field(() => ID)
   id: number;
 }
+
+@InputType()
+export class UpdateHabitInput implements Partial<Habit> {
+  @Field(() => ID)
+  id: number;
+
+  @Field({ nullable: true })
+  @MaxLength(64)
+  title?: string;
+
+  @Field({ nullable: true })
+  @MaxLength(255)
+  description?: string;
+
+  @Field({ nullable: true })
+  startDate?: Date;
+}
