@@ -28,7 +28,7 @@ export class HabitResolver {
   @Query(() => Habit)
   @UseMiddleware(Authenticated, HabitOwner)
   habit(@Arg('data') data: HabitInput): Promise<Habit> {
-    return this.habitRepository.findOneOrFail({ where: { id: data.id } });
+    return this.habitRepository.findOneOrFail({ where: { id: data.habitId } });
   }
 
   @Mutation(() => AddHabitPayload)
@@ -50,9 +50,9 @@ export class HabitResolver {
   @Mutation(() => RemoveHabitPayload)
   @UseMiddleware(Authenticated, HabitOwner)
   async removeHabit(@Arg('data') data: RemoveHabitInput): Promise<RemoveHabitPayload> {
-    const habit = await this.habitRepository.findOneOrFail(data.id);
+    const habit = await this.habitRepository.findOneOrFail(data.habitId);
     const deletedHabit = await this.habitRepository.remove(habit);
-    deletedHabit.id = data.id;
+    deletedHabit.id = data.habitId;
 
     return { habit: deletedHabit };
   }
@@ -60,7 +60,7 @@ export class HabitResolver {
   @Mutation(() => UpdateHabitPayload)
   @UseMiddleware(Authenticated, HabitOwner)
   async updateHabit(@Arg('data') data: UpdateHabitInput): Promise<UpdateHabitPayload> {
-    const habit = await this.habitRepository.findOneOrFail(data.id);
+    const habit = await this.habitRepository.findOneOrFail(data.habitId);
 
     if (!data.title && !data.description && !data.startDate) {
       return { habit };

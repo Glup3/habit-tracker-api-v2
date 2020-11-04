@@ -367,7 +367,7 @@ describe('Habit Resolver', () => {
     const response = await gCall({
       source: habitQuery,
       username: user.username,
-      variableValues: { data: { id: h1.id } }
+      variableValues: { data: { habitId: h1.id } }
     });
 
     expect(response).toMatchObject({
@@ -403,7 +403,7 @@ describe('Habit Resolver', () => {
     const response = await gCall({
       source: habitQuery,
       username: user.username,
-      variableValues: { data: { id: savedHabit.id } }
+      variableValues: { data: { habitId: savedHabit.id } }
     });
 
     expect(response.data).toBeNull();
@@ -417,7 +417,7 @@ describe('Habit Resolver', () => {
 
     const response = await gCall({
       source: habitQuery,
-      variableValues: { data: { id: 1 } }
+      variableValues: { data: { habitId: 1 } }
     });
 
     expect(response.data).toBeNull();
@@ -432,7 +432,7 @@ describe('Habit Resolver', () => {
     const response = await gCall({
       source: habitQuery,
       username: 'idontexist',
-      variableValues: { data: { id: 1 } }
+      variableValues: { data: { habitId: 1 } }
     });
 
     expect(response.data).toBeNull();
@@ -615,7 +615,7 @@ describe('Habit Resolver', () => {
     const response = await gCall({
       source: removeHabitMutation,
       username: user.username,
-      variableValues: { data: { id: savedHabit2.id } }
+      variableValues: { data: { habitId: savedHabit2.id } }
     });
 
     expect(response).toMatchObject({
@@ -661,7 +661,7 @@ describe('Habit Resolver', () => {
     const response = await gCall({
       source: removeHabitMutation,
       username: user.username,
-      variableValues: { data: { id: savedHabit2.id } }
+      variableValues: { data: { habitId: savedHabit2.id } }
     });
 
     expect(response.data).toBeNull();
@@ -675,7 +675,7 @@ describe('Habit Resolver', () => {
 
     const response = await gCall({
       source: removeHabitMutation,
-      variableValues: { data: { id: 1 } }
+      variableValues: { data: { habitId: 1 } }
     });
 
     expect(response.data).toBeNull();
@@ -690,7 +690,7 @@ describe('Habit Resolver', () => {
     const response = await gCall({
       source: removeHabitMutation,
       username: 'idontexist',
-      variableValues: { data: { id: 1 } }
+      variableValues: { data: { habitId: 1 } }
     });
 
     expect(response.data).toBeNull();
@@ -728,7 +728,7 @@ describe('Habit Resolver', () => {
       username: user.username,
       variableValues: {
         data: {
-          id: savedHabit.id,
+          habitId: savedHabit.id,
           title: title,
           description: description,
           startDate: startDate
@@ -777,7 +777,7 @@ describe('Habit Resolver', () => {
       username: user.username,
       variableValues: {
         data: {
-          id: savedHabit.id,
+          habitId: savedHabit.id,
           title: title
         }
       }
@@ -824,7 +824,7 @@ describe('Habit Resolver', () => {
       username: user.username,
       variableValues: {
         data: {
-          id: savedHabit.id,
+          habitId: savedHabit.id,
           description: description
         }
       }
@@ -871,7 +871,7 @@ describe('Habit Resolver', () => {
       username: user.username,
       variableValues: {
         data: {
-          id: savedHabit.id,
+          habitId: savedHabit.id,
           startDate: startDate
         }
       }
@@ -916,7 +916,7 @@ describe('Habit Resolver', () => {
       username: user.username,
       variableValues: {
         data: {
-          id: savedHabit.id
+          habitId: savedHabit.id
         }
       }
     });
@@ -960,7 +960,7 @@ describe('Habit Resolver', () => {
       username: user.username,
       variableValues: {
         data: {
-          id: savedHabit.id,
+          habitId: savedHabit.id,
           title: generateTitle(65),
           description: generateDescription(),
           startDate: generateDate().toISOString()
@@ -1002,7 +1002,7 @@ describe('Habit Resolver', () => {
       username: user.username,
       variableValues: {
         data: {
-          id: savedHabit.id,
+          habitId: savedHabit.id,
           title: generateTitle(65),
           startDate: generateDate().toISOString()
         }
@@ -1043,7 +1043,7 @@ describe('Habit Resolver', () => {
       username: user.username,
       variableValues: {
         data: {
-          id: savedHabit.id,
+          habitId: savedHabit.id,
           title: generateTitle(65)
         }
       }
@@ -1083,7 +1083,7 @@ describe('Habit Resolver', () => {
       username: user.username,
       variableValues: {
         data: {
-          id: savedHabit.id,
+          habitId: savedHabit.id,
           title: generateTitle(65),
           description: generateDescription()
         }
@@ -1124,7 +1124,7 @@ describe('Habit Resolver', () => {
       username: user.username,
       variableValues: {
         data: {
-          id: savedHabit.id,
+          habitId: savedHabit.id,
           title: generateTitle(),
           description: generateDescription(256),
           startDate: generateDate().toISOString()
@@ -1166,7 +1166,7 @@ describe('Habit Resolver', () => {
       username: user.username,
       variableValues: {
         data: {
-          id: savedHabit.id,
+          habitId: savedHabit.id,
           title: generateTitle(),
           description: generateDescription(256)
         }
@@ -1207,7 +1207,7 @@ describe('Habit Resolver', () => {
       username: user.username,
       variableValues: {
         data: {
-          id: savedHabit.id,
+          habitId: savedHabit.id,
           description: generateDescription(256),
           startDate: generateDate().toISOString()
         }
@@ -1248,7 +1248,7 @@ describe('Habit Resolver', () => {
       username: user.username,
       variableValues: {
         data: {
-          id: savedHabit.id,
+          habitId: savedHabit.id,
           description: generateDescription(256)
         }
       }
@@ -1288,7 +1288,7 @@ describe('Habit Resolver', () => {
       username: user.username,
       variableValues: {
         data: {
-          id: savedHabit.id,
+          habitId: savedHabit.id,
           title: generateTitle(),
           description: generateDescription(),
           startDate: 'invalid date'
@@ -1327,7 +1327,7 @@ describe('Habit Resolver', () => {
       username: user.username,
       variableValues: {
         data: {
-          id: savedHabit.id,
+          habitId: savedHabit.id,
           title: generateTitle(),
           startDate: 'invalid date'
         }
@@ -1365,7 +1365,7 @@ describe('Habit Resolver', () => {
       username: user.username,
       variableValues: {
         data: {
-          id: savedHabit.id,
+          habitId: savedHabit.id,
           description: generateDescription(),
           startDate: 'invalid date'
         }
@@ -1403,7 +1403,7 @@ describe('Habit Resolver', () => {
       username: user.username,
       variableValues: {
         data: {
-          id: savedHabit.id,
+          habitId: savedHabit.id,
           startDate: 'invalid date'
         }
       }
@@ -1442,7 +1442,7 @@ describe('Habit Resolver', () => {
       username: user.username,
       variableValues: {
         data: {
-          id: savedHabit.id,
+          habitId: savedHabit.id,
           title: generateTitle(65),
           description: generateDescription(256),
           startDate: startDate
@@ -1487,7 +1487,7 @@ describe('Habit Resolver', () => {
       username: user.username,
       variableValues: {
         data: {
-          id: savedHabit.id,
+          habitId: savedHabit.id,
           title: generateTitle(65),
           description: generateDescription(256),
           startDate: 'invalid date'
@@ -1532,7 +1532,7 @@ describe('Habit Resolver', () => {
       username: user.username,
       variableValues: {
         data: {
-          id: savedHabit.id,
+          habitId: savedHabit.id,
           title: generateTitle(65),
           description: generateDescription(),
           startDate: 'invalid date'
@@ -1574,7 +1574,7 @@ describe('Habit Resolver', () => {
       username: user.username,
       variableValues: {
         data: {
-          id: savedHabit.id,
+          habitId: savedHabit.id,
           title: generateTitle(),
           description: generateDescription(256),
           startDate: 'invalid date'
@@ -1620,7 +1620,7 @@ describe('Habit Resolver', () => {
       username: user.username,
       variableValues: {
         data: {
-          id: savedHabit.id,
+          habitId: savedHabit.id,
           title: title,
           description: description,
           startDate: startDate
@@ -1662,7 +1662,7 @@ describe('Habit Resolver', () => {
       username: user.username,
       variableValues: {
         data: {
-          id: savedHabit.id,
+          habitId: savedHabit.id,
           title: generateTitle(65),
           description: description,
           startDate: startDate
@@ -1683,7 +1683,7 @@ describe('Habit Resolver', () => {
       source: updateHabitMutation,
       variableValues: {
         data: {
-          id: 999,
+          habitId: 999,
           title: generateTitle(),
           description: generateDescription(),
           startDate: generateDate().toISOString()
@@ -1705,7 +1705,7 @@ describe('Habit Resolver', () => {
       username: 'userdoesntexist',
       variableValues: {
         data: {
-          id: 999,
+          habitId: 999,
           title: generateTitle(),
           description: generateDescription(),
           startDate: generateDate().toISOString()

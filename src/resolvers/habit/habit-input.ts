@@ -17,21 +17,21 @@ export class AddHabitInput implements Partial<Habit> {
 }
 
 @InputType()
-export class RemoveHabitInput implements Partial<Habit> {
+export class RemoveHabitInput {
   @Field(() => ID)
-  id: number;
+  habitId: number;
 }
 
 @InputType()
-export class HabitInput implements Partial<Habit> {
+export class HabitInput {
   @Field(() => ID)
-  id: number;
+  habitId: number;
 }
 
 @InputType()
 export class UpdateHabitInput implements Partial<Habit> {
   @Field(() => ID)
-  id: number;
+  habitId: number;
 
   @Field({ nullable: true })
   @MaxLength(64)

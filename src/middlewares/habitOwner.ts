@@ -18,14 +18,14 @@ export class HabitOwner implements MiddlewareInterface<Context> {
     let isOwner = false;
 
     user.habits.forEach((habit) => {
-      if (habit.id === parseInt(args.data.id, 10)) {
+      if (habit.id === parseInt(args.data.habitId, 10)) {
         isOwner = true;
         return;
       }
     });
 
     if (!isOwner) {
-      throw new Error(`Habit with the ID ${args.data.id} does not exist`);
+      throw new Error(`Habit with the ID ${args.data.habitId} does not exist`);
     }
 
     return next();
