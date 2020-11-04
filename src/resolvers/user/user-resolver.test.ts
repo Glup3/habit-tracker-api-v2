@@ -3,16 +3,18 @@ import { Connection, Repository } from 'typeorm';
 import { testConnection } from '../../test_utils/test-database';
 import { gCall } from '../../test_utils/gCall';
 import { User } from '../../entities/user';
-import { generateEmail, generateName, generatePassword, generateUsername } from '../../test_utils/data-generator';
+import { DataGenerator } from '../../test_utils/data-generator';
 import { ArgumentValidationError } from 'type-graphql';
 import { Maybe } from 'graphql/jsutils/Maybe';
 
 let conn: Connection;
+let dataGenerator: DataGenerator;
 let userRepository: Repository<User>;
 
 beforeAll(async () => {
   conn = await testConnection();
   userRepository = conn.getRepository(User);
+  dataGenerator = new DataGenerator(44444);
 });
 
 afterAll(async () => {
@@ -84,11 +86,11 @@ describe('User Resolver', () => {
     expect.assertions(1);
 
     const user = userRepository.create({
-      email: generateEmail(),
-      password: generatePassword(),
-      username: generateUsername(),
-      firstname: generateName(),
-      lastname: generateName()
+      email: dataGenerator.generateEmail(),
+      password: dataGenerator.generatePassword(),
+      username: dataGenerator.generateUsername(),
+      firstname: dataGenerator.generateName(),
+      lastname: dataGenerator.generateName()
     });
     await userRepository.save(user);
 
@@ -177,10 +179,10 @@ describe('User Resolver', () => {
 
     const user = userRepository.create({
       email: 'insane@custom.email',
-      password: generatePassword(),
-      username: generateUsername(),
-      firstname: generateName(),
-      lastname: generateName()
+      password: dataGenerator.generatePassword(),
+      username: dataGenerator.generateUsername(),
+      firstname: dataGenerator.generateName(),
+      lastname: dataGenerator.generateName()
     });
     await userRepository.save(user);
 
@@ -239,11 +241,11 @@ describe('User Resolver', () => {
     expect.assertions(1);
 
     const user = userRepository.create({
-      email: generateEmail(),
-      password: generatePassword(),
-      username: generateUsername(),
-      firstname: generateName(),
-      lastname: generateName()
+      email: dataGenerator.generateEmail(),
+      password: dataGenerator.generatePassword(),
+      username: dataGenerator.generateUsername(),
+      firstname: dataGenerator.generateName(),
+      lastname: dataGenerator.generateName()
     });
 
     await userRepository.save(user);
@@ -296,11 +298,11 @@ describe('User Resolver', () => {
     expect.assertions(1);
 
     const user = userRepository.create({
-      email: generateEmail(),
-      password: generatePassword(),
+      email: dataGenerator.generateEmail(),
+      password: dataGenerator.generatePassword(),
       username: 'thecoolest_username132',
-      firstname: generateName(),
-      lastname: generateName()
+      firstname: dataGenerator.generateName(),
+      lastname: dataGenerator.generateName()
     });
     await userRepository.save(user);
 
@@ -445,11 +447,11 @@ describe('User Resolver', () => {
     const lastname = 'Mustermann';
 
     const user = userRepository.create({
-      email: generateEmail(),
-      password: generatePassword(),
-      username: generateUsername(),
-      firstname: generateName(),
-      lastname: generateName()
+      email: dataGenerator.generateEmail(),
+      password: dataGenerator.generatePassword(),
+      username: dataGenerator.generateUsername(),
+      firstname: dataGenerator.generateName(),
+      lastname: dataGenerator.generateName()
     });
     await userRepository.save(user);
 
@@ -478,11 +480,11 @@ describe('User Resolver', () => {
     const firstname = 'Max';
 
     const user = userRepository.create({
-      email: generateEmail(),
-      password: generatePassword(),
-      username: generateUsername(),
-      firstname: generateName(),
-      lastname: generateName()
+      email: dataGenerator.generateEmail(),
+      password: dataGenerator.generatePassword(),
+      username: dataGenerator.generateUsername(),
+      firstname: dataGenerator.generateName(),
+      lastname: dataGenerator.generateName()
     });
     await userRepository.save(user);
 
@@ -511,11 +513,11 @@ describe('User Resolver', () => {
     const lastname = 'Mustermann';
 
     const user = userRepository.create({
-      email: generateEmail(),
-      password: generatePassword(),
-      username: generateUsername(),
-      firstname: generateName(),
-      lastname: generateName()
+      email: dataGenerator.generateEmail(),
+      password: dataGenerator.generatePassword(),
+      username: dataGenerator.generateUsername(),
+      firstname: dataGenerator.generateName(),
+      lastname: dataGenerator.generateName()
     });
     await userRepository.save(user);
 
@@ -542,11 +544,11 @@ describe('User Resolver', () => {
     expect.assertions(1);
 
     const user = userRepository.create({
-      email: generateEmail(),
-      password: generatePassword(),
-      username: generateUsername(),
-      firstname: generateName(),
-      lastname: generateName()
+      email: dataGenerator.generateEmail(),
+      password: dataGenerator.generatePassword(),
+      username: dataGenerator.generateUsername(),
+      firstname: dataGenerator.generateName(),
+      lastname: dataGenerator.generateName()
     });
     await userRepository.save(user);
 
@@ -593,7 +595,7 @@ describe('User Resolver', () => {
     const response = await gCall({
       source: updateMeMutation,
       username: 'random_user',
-      variableValues: { data: { firstname: generateName(33), lastname: 'Mustermann' } }
+      variableValues: { data: { firstname: dataGenerator.generateName(33), lastname: 'Mustermann' } }
     });
 
     expect(response.data).toBeNull();
@@ -611,7 +613,7 @@ describe('User Resolver', () => {
     const response = await gCall({
       source: updateMeMutation,
       username: 'random_user',
-      variableValues: { data: { firstname: generateName(), lastname: '' } }
+      variableValues: { data: { firstname: dataGenerator.generateName(), lastname: '' } }
     });
 
     expect(response.data).toBeNull();
@@ -629,7 +631,7 @@ describe('User Resolver', () => {
     const response = await gCall({
       source: updateMeMutation,
       username: 'random_user',
-      variableValues: { data: { firstname: generateName(), lastname: generateName(33) } }
+      variableValues: { data: { firstname: dataGenerator.generateName(), lastname: dataGenerator.generateName(33) } }
     });
 
     expect(response.data).toBeNull();
@@ -674,7 +676,7 @@ describe('User Resolver', () => {
     const response = await gCall({
       source: updateMeMutation,
       username: 'random_user',
-      variableValues: { data: { firstname: generateName(33), lastname: generateName(33) } }
+      variableValues: { data: { firstname: dataGenerator.generateName(33), lastname: dataGenerator.generateName(33) } }
     });
 
     expect(response.data).toBeNull();
@@ -713,7 +715,7 @@ describe('User Resolver', () => {
     const response = await gCall({
       source: updateMeMutation,
       username: 'random_user',
-      variableValues: { data: { firstname: generateName(33) } }
+      variableValues: { data: { firstname: dataGenerator.generateName(33) } }
     });
 
     expect(response.data).toBeNull();
@@ -749,7 +751,7 @@ describe('User Resolver', () => {
     const response = await gCall({
       source: updateMeMutation,
       username: 'random_user',
-      variableValues: { data: { lastname: generateName(33) } }
+      variableValues: { data: { lastname: dataGenerator.generateName(33) } }
     });
 
     expect(response.data).toBeNull();
@@ -867,11 +869,11 @@ describe('User Resolver', () => {
 
     const username = 'hypercool_user1';
     const user = {
-      email: generateEmail(),
-      password: generatePassword(),
+      email: dataGenerator.generateEmail(),
+      password: dataGenerator.generatePassword(),
       username: username,
-      firstname: generateName(),
-      lastname: generateName()
+      firstname: dataGenerator.generateName(),
+      lastname: dataGenerator.generateName()
     };
 
     await gCall({
@@ -901,11 +903,11 @@ describe('User Resolver', () => {
     expect.assertions(4);
 
     const user = {
-      email: generateEmail(),
-      password: generatePassword(),
-      username: generateUsername(),
-      firstname: generateName(),
-      lastname: generateName()
+      email: dataGenerator.generateEmail(),
+      password: dataGenerator.generatePassword(),
+      username: dataGenerator.generateUsername(),
+      firstname: dataGenerator.generateName(),
+      lastname: dataGenerator.generateName()
     };
 
     await gCall({

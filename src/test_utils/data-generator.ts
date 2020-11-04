@@ -1,21 +1,27 @@
 import Chance from 'chance';
 
-const chance = Chance(12345);
+export class DataGenerator {
+  chance: Chance.Chance;
 
-export const generateUsername = (length = 31): string =>
-  chance.string({ length, pool: 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789' });
+  constructor(seed = 12345) {
+    this.chance = Chance(seed);
+  }
 
-export const generateName = (length = 16): string =>
-  chance.string({ length, pool: 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ' });
+  generateUsername = (length = 31): string =>
+    this.chance.string({ length, pool: 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789' });
 
-export const generatePassword = (length = 16): string => chance.string({ length });
+  generateName = (length = 16): string =>
+    this.chance.string({ length, pool: 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ' });
 
-export const generateEmail = (): string => `${generateName(16)}@${generateName(6)}.com`;
+  generatePassword = (length = 16): string => this.chance.string({ length });
 
-export const generateDate = (): Date => chance.date();
+  generateEmail = (): string => `${this.generateName(16)}@${this.generateName(6)}.com`;
 
-export const generateTitle = (length = 16): string =>
-  chance.string({ length, pool: 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ' });
+  generateDate = (): Date => this.chance.date();
 
-export const generateDescription = (length = 32): string =>
-  chance.string({ length, pool: 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ ' });
+  generateTitle = (length = 16): string =>
+    this.chance.string({ length, pool: 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ' });
+
+  generateDescription = (length = 32): string =>
+    this.chance.string({ length, pool: 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ ' });
+}

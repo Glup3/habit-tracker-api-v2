@@ -4,19 +4,12 @@ import { ArgumentValidationError } from 'type-graphql';
 
 import { testConnection } from '../../test_utils/test-database';
 import { gCall } from '../../test_utils/gCall';
-import {
-  generateDate,
-  generateDescription,
-  generateEmail,
-  generateName,
-  generatePassword,
-  generateTitle,
-  generateUsername
-} from '../../test_utils/data-generator';
+import { DataGenerator } from '../../test_utils/data-generator';
 import { User } from '../../entities/user';
 import { Habit } from '../../entities/habit';
 
 let conn: Connection;
+let dataGenerator: DataGenerator;
 let userRepository: Repository<User>;
 let habitRepository: Repository<Habit>;
 
@@ -24,6 +17,7 @@ beforeAll(async () => {
   conn = await testConnection();
   userRepository = conn.getRepository(User);
   habitRepository = conn.getRepository(Habit);
+  dataGenerator = new DataGenerator(12345);
 });
 
 afterAll(async () => {
@@ -99,16 +93,16 @@ describe('Habit Resolver', () => {
     expect.assertions(1);
 
     const habit = {
-      title: generateTitle(),
-      description: generateDescription(),
-      startDate: generateDate().toISOString()
+      title: dataGenerator.generateTitle(),
+      description: dataGenerator.generateDescription(),
+      startDate: dataGenerator.generateDate().toISOString()
     };
     const user = userRepository.create({
-      email: generateEmail(),
-      password: generatePassword(),
-      username: 'superunqiue_1',
-      firstname: generateName(),
-      lastname: generateName(),
+      email: dataGenerator.generateEmail(),
+      password: dataGenerator.generatePassword(),
+      username: dataGenerator.generateUsername(),
+      firstname: dataGenerator.generateName(),
+      lastname: dataGenerator.generateName(),
       habits: []
     });
     await userRepository.save(user);
@@ -136,15 +130,15 @@ describe('Habit Resolver', () => {
     expect.assertions(1);
 
     const habit = {
-      title: generateTitle(),
-      startDate: generateDate().toISOString()
+      title: dataGenerator.generateTitle(),
+      startDate: dataGenerator.generateDate().toISOString()
     };
     const user = userRepository.create({
-      email: generateEmail(),
-      password: generatePassword(),
+      email: dataGenerator.generateEmail(),
+      password: dataGenerator.generatePassword(),
       username: 'another_user1',
-      firstname: generateName(),
-      lastname: generateName(),
+      firstname: dataGenerator.generateName(),
+      lastname: dataGenerator.generateName(),
       habits: []
     });
     await userRepository.save(user);
@@ -172,9 +166,9 @@ describe('Habit Resolver', () => {
     expect.assertions(5);
 
     const habit = {
-      title: generateTitle(65),
-      description: generateDescription(),
-      startDate: generateDate().toISOString()
+      title: dataGenerator.generateTitle(65),
+      description: dataGenerator.generateDescription(),
+      startDate: dataGenerator.generateDate().toISOString()
     };
 
     const response = await gCall({
@@ -196,9 +190,9 @@ describe('Habit Resolver', () => {
     expect.assertions(5);
 
     const habit = {
-      title: generateTitle(),
-      description: generateDescription(256),
-      startDate: generateDate().toISOString()
+      title: dataGenerator.generateTitle(),
+      description: dataGenerator.generateDescription(256),
+      startDate: dataGenerator.generateDate().toISOString()
     };
 
     const response = await gCall({
@@ -220,16 +214,16 @@ describe('Habit Resolver', () => {
     expect.assertions(4);
 
     const habit = {
-      title: generateTitle(),
-      description: generateDescription(),
+      title: dataGenerator.generateTitle(),
+      description: dataGenerator.generateDescription(),
       startDate: 'not a date'
     };
     const user = userRepository.create({
-      email: generateEmail(),
-      password: generatePassword(),
+      email: dataGenerator.generateEmail(),
+      password: dataGenerator.generatePassword(),
       username: 'superunqiue_1312',
-      firstname: generateName(),
-      lastname: generateName(),
+      firstname: dataGenerator.generateName(),
+      lastname: dataGenerator.generateName(),
       habits: []
     });
     await userRepository.save(user);
@@ -250,9 +244,9 @@ describe('Habit Resolver', () => {
     expect.assertions(4);
 
     const habit = {
-      title: generateTitle(),
-      description: generateDescription(),
-      startDate: generateDate().toISOString()
+      title: dataGenerator.generateTitle(),
+      description: dataGenerator.generateDescription(),
+      startDate: dataGenerator.generateDate().toISOString()
     };
 
     const response = await gCall({
@@ -270,9 +264,9 @@ describe('Habit Resolver', () => {
     expect.assertions(4);
 
     const habit = {
-      title: generateTitle(),
-      description: generateDescription(),
-      startDate: generateDate().toISOString()
+      title: dataGenerator.generateTitle(),
+      description: dataGenerator.generateDescription(),
+      startDate: dataGenerator.generateDate().toISOString()
     };
 
     const response = await gCall({
@@ -289,26 +283,26 @@ describe('Habit Resolver', () => {
 
   test('if user adds multiple valid habits then user should have those habits', async () => {
     const habit1 = {
-      title: generateTitle(),
-      description: generateDescription(),
-      startDate: generateDate().toISOString()
+      title: dataGenerator.generateTitle(),
+      description: dataGenerator.generateDescription(),
+      startDate: dataGenerator.generateDate().toISOString()
     };
     const habit2 = {
-      title: generateTitle(),
-      description: generateDescription(),
-      startDate: generateDate().toISOString()
+      title: dataGenerator.generateTitle(),
+      description: dataGenerator.generateDescription(),
+      startDate: dataGenerator.generateDate().toISOString()
     };
     const habit3 = {
-      title: generateTitle(),
-      description: generateDescription(),
-      startDate: generateDate().toISOString()
+      title: dataGenerator.generateTitle(),
+      description: dataGenerator.generateDescription(),
+      startDate: dataGenerator.generateDate().toISOString()
     };
     const user = userRepository.create({
-      email: generateEmail(),
-      password: generatePassword(),
-      username: generateName(),
-      firstname: generateName(),
-      lastname: generateName(),
+      email: dataGenerator.generateEmail(),
+      password: dataGenerator.generatePassword(),
+      username: dataGenerator.generateName(),
+      firstname: dataGenerator.generateName(),
+      lastname: dataGenerator.generateName(),
       habits: []
     });
     userRepository.save(user);
@@ -341,25 +335,25 @@ describe('Habit Resolver', () => {
     expect.assertions(1);
 
     const habit1 = habitRepository.create({
-      title: generateTitle(),
-      description: generateDescription(),
-      startDate: generateDate().toISOString()
+      title: dataGenerator.generateTitle(),
+      description: dataGenerator.generateDescription(),
+      startDate: dataGenerator.generateDate().toISOString()
     });
     const habit2 = habitRepository.create({
-      title: generateTitle(),
-      description: generateDescription(),
-      startDate: generateDate().toISOString()
+      title: dataGenerator.generateTitle(),
+      description: dataGenerator.generateDescription(),
+      startDate: dataGenerator.generateDate().toISOString()
     });
 
     const h1 = await habitRepository.save(habit1);
     await habitRepository.save(habit2);
 
     const user = userRepository.create({
-      email: generateEmail(),
-      password: generatePassword(),
-      username: generateName(),
-      firstname: generateName(),
-      lastname: generateName(),
+      email: dataGenerator.generateEmail(),
+      password: dataGenerator.generatePassword(),
+      username: dataGenerator.generateName(),
+      firstname: dataGenerator.generateName(),
+      lastname: dataGenerator.generateName(),
       habits: [habit1, habit2]
     });
     await userRepository.save(user);
@@ -385,17 +379,17 @@ describe('Habit Resolver', () => {
     expect.assertions(4);
 
     const habit = habitRepository.create({
-      title: generateTitle(),
-      description: generateDescription(),
-      startDate: generateDate().toISOString()
+      title: dataGenerator.generateTitle(),
+      description: dataGenerator.generateDescription(),
+      startDate: dataGenerator.generateDate().toISOString()
     });
     const savedHabit = await habitRepository.save(habit);
     const user = userRepository.create({
-      email: generateEmail(),
-      password: generatePassword(),
-      username: generateName(),
-      firstname: generateName(),
-      lastname: generateName(),
+      email: dataGenerator.generateEmail(),
+      password: dataGenerator.generatePassword(),
+      username: dataGenerator.generateName(),
+      firstname: dataGenerator.generateName(),
+      lastname: dataGenerator.generateName(),
       habits: []
     });
     await userRepository.save(user);
@@ -446,28 +440,28 @@ describe('Habit Resolver', () => {
 
     const habit1 = habitRepository.create({
       title: 'title1',
-      description: generateDescription(),
-      startDate: generateDate().toISOString()
+      description: dataGenerator.generateDescription(),
+      startDate: dataGenerator.generateDate().toISOString()
     });
     const habit2 = habitRepository.create({
       title: 'title2',
-      description: generateDescription(),
-      startDate: generateDate().toISOString()
+      description: dataGenerator.generateDescription(),
+      startDate: dataGenerator.generateDate().toISOString()
     });
     const habit3 = habitRepository.create({
       title: 'title3',
-      description: generateDescription(),
-      startDate: generateDate().toISOString()
+      description: dataGenerator.generateDescription(),
+      startDate: dataGenerator.generateDate().toISOString()
     });
     const habit4 = habitRepository.create({
       title: 'title4',
-      description: generateDescription(),
-      startDate: generateDate().toISOString()
+      description: dataGenerator.generateDescription(),
+      startDate: dataGenerator.generateDate().toISOString()
     });
     const habit5 = habitRepository.create({
       title: 'title5',
-      description: generateDescription(),
-      startDate: generateDate().toISOString()
+      description: dataGenerator.generateDescription(),
+      startDate: dataGenerator.generateDate().toISOString()
     });
 
     await habitRepository.save(habit1);
@@ -477,19 +471,19 @@ describe('Habit Resolver', () => {
     await habitRepository.save(habit5);
 
     const user1 = userRepository.create({
-      email: generateEmail(),
-      password: generatePassword(),
-      username: generateName(),
-      firstname: generateName(),
-      lastname: generateName(),
+      email: dataGenerator.generateEmail(),
+      password: dataGenerator.generatePassword(),
+      username: dataGenerator.generateName(),
+      firstname: dataGenerator.generateName(),
+      lastname: dataGenerator.generateName(),
       habits: [habit1, habit2, habit4, habit5]
     });
     const user2 = userRepository.create({
-      email: generateEmail(),
-      password: generatePassword(),
-      username: generateName(),
-      firstname: generateName(),
-      lastname: generateName(),
+      email: dataGenerator.generateEmail(),
+      password: dataGenerator.generatePassword(),
+      username: dataGenerator.generateName(),
+      firstname: dataGenerator.generateName(),
+      lastname: dataGenerator.generateName(),
       habits: [habit3]
     });
     await userRepository.save(user1);
@@ -532,11 +526,11 @@ describe('Habit Resolver', () => {
     expect.assertions(1);
 
     const user = userRepository.create({
-      email: generateEmail(),
-      password: generatePassword(),
-      username: generateName(),
-      firstname: generateName(),
-      lastname: generateName(),
+      email: dataGenerator.generateEmail(),
+      password: dataGenerator.generatePassword(),
+      username: dataGenerator.generateName(),
+      firstname: dataGenerator.generateName(),
+      lastname: dataGenerator.generateName(),
       habits: []
     });
     await userRepository.save(user);
@@ -584,19 +578,19 @@ describe('Habit Resolver', () => {
     expect.assertions(1);
 
     const habit1 = habitRepository.create({
-      title: generateTitle(),
-      description: generateDescription(),
-      startDate: generateDate().toISOString()
+      title: dataGenerator.generateTitle(),
+      description: dataGenerator.generateDescription(),
+      startDate: dataGenerator.generateDate().toISOString()
     });
     const habit2 = habitRepository.create({
-      title: generateTitle(),
-      description: generateDescription(),
-      startDate: generateDate().toISOString()
+      title: dataGenerator.generateTitle(),
+      description: dataGenerator.generateDescription(),
+      startDate: dataGenerator.generateDate().toISOString()
     });
     const habit3 = habitRepository.create({
-      title: generateTitle(),
-      description: generateDescription(),
-      startDate: generateDate().toISOString()
+      title: dataGenerator.generateTitle(),
+      description: dataGenerator.generateDescription(),
+      startDate: dataGenerator.generateDate().toISOString()
     });
     await habitRepository.save(habit1);
     const savedHabit2 = await habitRepository.save(habit2);
@@ -604,10 +598,10 @@ describe('Habit Resolver', () => {
 
     const user = userRepository.create({
       email: 'supernew@email.com',
-      password: generatePassword(),
-      username: generateUsername(),
-      firstname: generateName(),
-      lastname: generateName(),
+      password: dataGenerator.generatePassword(),
+      username: dataGenerator.generateUsername(),
+      firstname: dataGenerator.generateName(),
+      lastname: dataGenerator.generateName(),
       habits: [habit1, habit2, habit3]
     });
     await userRepository.save(user);
@@ -636,24 +630,24 @@ describe('Habit Resolver', () => {
     expect.assertions(4);
 
     const habit1 = habitRepository.create({
-      title: generateTitle(),
-      description: generateDescription(),
-      startDate: generateDate().toISOString()
+      title: dataGenerator.generateTitle(),
+      description: dataGenerator.generateDescription(),
+      startDate: dataGenerator.generateDate().toISOString()
     });
     const habit2 = habitRepository.create({
-      title: generateTitle(),
-      description: generateDescription(),
-      startDate: generateDate().toISOString()
+      title: dataGenerator.generateTitle(),
+      description: dataGenerator.generateDescription(),
+      startDate: dataGenerator.generateDate().toISOString()
     });
     await habitRepository.save(habit1);
     const savedHabit2 = await habitRepository.save(habit2);
 
     const user = userRepository.create({
-      email: generateEmail(),
-      password: generatePassword(),
-      username: generateName(),
-      firstname: generateName(),
-      lastname: generateName(),
+      email: dataGenerator.generateEmail(),
+      password: dataGenerator.generatePassword(),
+      username: dataGenerator.generateName(),
+      firstname: dataGenerator.generateName(),
+      lastname: dataGenerator.generateName(),
       habits: [habit1]
     });
     await userRepository.save(user);
@@ -707,18 +701,18 @@ describe('Habit Resolver', () => {
     const startDate = '2020-02-07T21:04:39.573Z';
 
     const habit = habitRepository.create({
-      title: generateTitle(),
-      description: generateDescription(),
-      startDate: generateDate().toISOString()
+      title: dataGenerator.generateTitle(),
+      description: dataGenerator.generateDescription(),
+      startDate: dataGenerator.generateDate().toISOString()
     });
     const savedHabit = await habitRepository.save(habit);
 
     const user = userRepository.create({
-      email: generateEmail(),
-      password: generatePassword(),
-      username: generateUsername(),
-      firstname: generateName(),
-      lastname: generateName(),
+      email: dataGenerator.generateEmail(),
+      password: dataGenerator.generatePassword(),
+      username: dataGenerator.generateUsername(),
+      firstname: dataGenerator.generateName(),
+      lastname: dataGenerator.generateName(),
       habits: [habit]
     });
     await userRepository.save(user);
@@ -756,18 +750,18 @@ describe('Habit Resolver', () => {
     const title = 'Dancing KPOP';
 
     const habit = habitRepository.create({
-      title: generateTitle(),
-      description: generateDescription(),
-      startDate: generateDate().toISOString()
+      title: dataGenerator.generateTitle(),
+      description: dataGenerator.generateDescription(),
+      startDate: dataGenerator.generateDate().toISOString()
     });
     const savedHabit = await habitRepository.save(habit);
 
     const user = userRepository.create({
-      email: generateEmail(),
-      password: generatePassword(),
-      username: generateUsername(),
-      firstname: generateName(),
-      lastname: generateName(),
+      email: dataGenerator.generateEmail(),
+      password: dataGenerator.generatePassword(),
+      username: dataGenerator.generateUsername(),
+      firstname: dataGenerator.generateName(),
+      lastname: dataGenerator.generateName(),
       habits: [habit]
     });
     await userRepository.save(user);
@@ -803,18 +797,18 @@ describe('Habit Resolver', () => {
     const description = 'Dancing KPOP songs for atleast 60 minutes';
 
     const habit = habitRepository.create({
-      title: generateTitle(),
-      description: generateDescription(),
-      startDate: generateDate().toISOString()
+      title: dataGenerator.generateTitle(),
+      description: dataGenerator.generateDescription(),
+      startDate: dataGenerator.generateDate().toISOString()
     });
     const savedHabit = await habitRepository.save(habit);
 
     const user = userRepository.create({
-      email: generateEmail(),
-      password: generatePassword(),
-      username: generateUsername(),
-      firstname: generateName(),
-      lastname: generateName(),
+      email: dataGenerator.generateEmail(),
+      password: dataGenerator.generatePassword(),
+      username: dataGenerator.generateUsername(),
+      firstname: dataGenerator.generateName(),
+      lastname: dataGenerator.generateName(),
       habits: [habit]
     });
     await userRepository.save(user);
@@ -850,18 +844,18 @@ describe('Habit Resolver', () => {
     const startDate = '2020-02-07T21:04:39.573Z';
 
     const habit = habitRepository.create({
-      title: generateTitle(),
-      description: generateDescription(),
-      startDate: generateDate().toISOString()
+      title: dataGenerator.generateTitle(),
+      description: dataGenerator.generateDescription(),
+      startDate: dataGenerator.generateDate().toISOString()
     });
     const savedHabit = await habitRepository.save(habit);
 
     const user = userRepository.create({
-      email: generateEmail(),
-      password: generatePassword(),
-      username: generateUsername(),
-      firstname: generateName(),
-      lastname: generateName(),
+      email: dataGenerator.generateEmail(),
+      password: dataGenerator.generatePassword(),
+      username: dataGenerator.generateUsername(),
+      firstname: dataGenerator.generateName(),
+      lastname: dataGenerator.generateName(),
       habits: [habit]
     });
     await userRepository.save(user);
@@ -895,18 +889,18 @@ describe('Habit Resolver', () => {
     expect.assertions(1);
 
     const habit = habitRepository.create({
-      title: generateTitle(),
-      description: generateDescription(),
-      startDate: generateDate().toISOString()
+      title: dataGenerator.generateTitle(),
+      description: dataGenerator.generateDescription(),
+      startDate: dataGenerator.generateDate().toISOString()
     });
     const savedHabit = await habitRepository.save(habit);
 
     const user = userRepository.create({
-      email: generateEmail(),
-      password: generatePassword(),
-      username: generateUsername(),
-      firstname: generateName(),
-      lastname: generateName(),
+      email: dataGenerator.generateEmail(),
+      password: dataGenerator.generatePassword(),
+      username: dataGenerator.generateUsername(),
+      firstname: dataGenerator.generateName(),
+      lastname: dataGenerator.generateName(),
       habits: [habit]
     });
     await userRepository.save(user);
@@ -939,18 +933,18 @@ describe('Habit Resolver', () => {
     expect.assertions(5);
 
     const habit = habitRepository.create({
-      title: generateTitle(),
-      description: generateDescription(),
-      startDate: generateDate().toISOString()
+      title: dataGenerator.generateTitle(),
+      description: dataGenerator.generateDescription(),
+      startDate: dataGenerator.generateDate().toISOString()
     });
     const savedHabit = await habitRepository.save(habit);
 
     const user = userRepository.create({
-      email: generateEmail(),
-      password: generatePassword(),
-      username: generateUsername(),
-      firstname: generateName(),
-      lastname: generateName(),
+      email: dataGenerator.generateEmail(),
+      password: dataGenerator.generatePassword(),
+      username: dataGenerator.generateUsername(),
+      firstname: dataGenerator.generateName(),
+      lastname: dataGenerator.generateName(),
       habits: [habit]
     });
     await userRepository.save(user);
@@ -961,9 +955,9 @@ describe('Habit Resolver', () => {
       variableValues: {
         data: {
           habitId: savedHabit.id,
-          title: generateTitle(65),
-          description: generateDescription(),
-          startDate: generateDate().toISOString()
+          title: dataGenerator.generateTitle(65),
+          description: dataGenerator.generateDescription(),
+          startDate: dataGenerator.generateDate().toISOString()
         }
       }
     });
@@ -981,18 +975,18 @@ describe('Habit Resolver', () => {
     expect.assertions(5);
 
     const habit = habitRepository.create({
-      title: generateTitle(),
-      description: generateDescription(),
-      startDate: generateDate().toISOString()
+      title: dataGenerator.generateTitle(),
+      description: dataGenerator.generateDescription(),
+      startDate: dataGenerator.generateDate().toISOString()
     });
     const savedHabit = await habitRepository.save(habit);
 
     const user = userRepository.create({
-      email: generateEmail(),
-      password: generatePassword(),
-      username: generateUsername(),
-      firstname: generateName(),
-      lastname: generateName(),
+      email: dataGenerator.generateEmail(),
+      password: dataGenerator.generatePassword(),
+      username: dataGenerator.generateUsername(),
+      firstname: dataGenerator.generateName(),
+      lastname: dataGenerator.generateName(),
       habits: [habit]
     });
     await userRepository.save(user);
@@ -1003,8 +997,8 @@ describe('Habit Resolver', () => {
       variableValues: {
         data: {
           habitId: savedHabit.id,
-          title: generateTitle(65),
-          startDate: generateDate().toISOString()
+          title: dataGenerator.generateTitle(65),
+          startDate: dataGenerator.generateDate().toISOString()
         }
       }
     });
@@ -1022,18 +1016,18 @@ describe('Habit Resolver', () => {
     expect.assertions(5);
 
     const habit = habitRepository.create({
-      title: generateTitle(),
-      description: generateDescription(),
-      startDate: generateDate().toISOString()
+      title: dataGenerator.generateTitle(),
+      description: dataGenerator.generateDescription(),
+      startDate: dataGenerator.generateDate().toISOString()
     });
     const savedHabit = await habitRepository.save(habit);
 
     const user = userRepository.create({
-      email: generateEmail(),
-      password: generatePassword(),
-      username: generateUsername(),
-      firstname: generateName(),
-      lastname: generateName(),
+      email: dataGenerator.generateEmail(),
+      password: dataGenerator.generatePassword(),
+      username: dataGenerator.generateUsername(),
+      firstname: dataGenerator.generateName(),
+      lastname: dataGenerator.generateName(),
       habits: [habit]
     });
     await userRepository.save(user);
@@ -1044,7 +1038,7 @@ describe('Habit Resolver', () => {
       variableValues: {
         data: {
           habitId: savedHabit.id,
-          title: generateTitle(65)
+          title: dataGenerator.generateTitle(65)
         }
       }
     });
@@ -1062,18 +1056,18 @@ describe('Habit Resolver', () => {
     expect.assertions(5);
 
     const habit = habitRepository.create({
-      title: generateTitle(),
-      description: generateDescription(),
-      startDate: generateDate().toISOString()
+      title: dataGenerator.generateTitle(),
+      description: dataGenerator.generateDescription(),
+      startDate: dataGenerator.generateDate().toISOString()
     });
     const savedHabit = await habitRepository.save(habit);
 
     const user = userRepository.create({
-      email: generateEmail(),
-      password: generatePassword(),
-      username: generateUsername(),
-      firstname: generateName(),
-      lastname: generateName(),
+      email: dataGenerator.generateEmail(),
+      password: dataGenerator.generatePassword(),
+      username: dataGenerator.generateUsername(),
+      firstname: dataGenerator.generateName(),
+      lastname: dataGenerator.generateName(),
       habits: [habit]
     });
     await userRepository.save(user);
@@ -1084,8 +1078,8 @@ describe('Habit Resolver', () => {
       variableValues: {
         data: {
           habitId: savedHabit.id,
-          title: generateTitle(65),
-          description: generateDescription()
+          title: dataGenerator.generateTitle(65),
+          description: dataGenerator.generateDescription()
         }
       }
     });
@@ -1103,18 +1097,18 @@ describe('Habit Resolver', () => {
     expect.assertions(5);
 
     const habit = habitRepository.create({
-      title: generateTitle(),
-      description: generateDescription(),
-      startDate: generateDate().toISOString()
+      title: dataGenerator.generateTitle(),
+      description: dataGenerator.generateDescription(),
+      startDate: dataGenerator.generateDate().toISOString()
     });
     const savedHabit = await habitRepository.save(habit);
 
     const user = userRepository.create({
-      email: generateEmail(),
-      password: generatePassword(),
-      username: generateUsername(),
-      firstname: generateName(),
-      lastname: generateName(),
+      email: dataGenerator.generateEmail(),
+      password: dataGenerator.generatePassword(),
+      username: dataGenerator.generateUsername(),
+      firstname: dataGenerator.generateName(),
+      lastname: dataGenerator.generateName(),
       habits: [habit]
     });
     await userRepository.save(user);
@@ -1125,9 +1119,9 @@ describe('Habit Resolver', () => {
       variableValues: {
         data: {
           habitId: savedHabit.id,
-          title: generateTitle(),
-          description: generateDescription(256),
-          startDate: generateDate().toISOString()
+          title: dataGenerator.generateTitle(),
+          description: dataGenerator.generateDescription(256),
+          startDate: dataGenerator.generateDate().toISOString()
         }
       }
     });
@@ -1145,18 +1139,18 @@ describe('Habit Resolver', () => {
     expect.assertions(5);
 
     const habit = habitRepository.create({
-      title: generateTitle(),
-      description: generateDescription(),
-      startDate: generateDate().toISOString()
+      title: dataGenerator.generateTitle(),
+      description: dataGenerator.generateDescription(),
+      startDate: dataGenerator.generateDate().toISOString()
     });
     const savedHabit = await habitRepository.save(habit);
 
     const user = userRepository.create({
-      email: generateEmail(),
-      password: generatePassword(),
-      username: generateUsername(),
-      firstname: generateName(),
-      lastname: generateName(),
+      email: dataGenerator.generateEmail(),
+      password: dataGenerator.generatePassword(),
+      username: dataGenerator.generateUsername(),
+      firstname: dataGenerator.generateName(),
+      lastname: dataGenerator.generateName(),
       habits: [habit]
     });
     await userRepository.save(user);
@@ -1167,8 +1161,8 @@ describe('Habit Resolver', () => {
       variableValues: {
         data: {
           habitId: savedHabit.id,
-          title: generateTitle(),
-          description: generateDescription(256)
+          title: dataGenerator.generateTitle(),
+          description: dataGenerator.generateDescription(256)
         }
       }
     });
@@ -1186,18 +1180,18 @@ describe('Habit Resolver', () => {
     expect.assertions(5);
 
     const habit = habitRepository.create({
-      title: generateTitle(),
-      description: generateDescription(),
-      startDate: generateDate().toISOString()
+      title: dataGenerator.generateTitle(),
+      description: dataGenerator.generateDescription(),
+      startDate: dataGenerator.generateDate().toISOString()
     });
     const savedHabit = await habitRepository.save(habit);
 
     const user = userRepository.create({
-      email: generateEmail(),
-      password: generatePassword(),
-      username: generateUsername(),
-      firstname: generateName(),
-      lastname: generateName(),
+      email: dataGenerator.generateEmail(),
+      password: dataGenerator.generatePassword(),
+      username: dataGenerator.generateUsername(),
+      firstname: dataGenerator.generateName(),
+      lastname: dataGenerator.generateName(),
       habits: [habit]
     });
     await userRepository.save(user);
@@ -1208,8 +1202,8 @@ describe('Habit Resolver', () => {
       variableValues: {
         data: {
           habitId: savedHabit.id,
-          description: generateDescription(256),
-          startDate: generateDate().toISOString()
+          description: dataGenerator.generateDescription(256),
+          startDate: dataGenerator.generateDate().toISOString()
         }
       }
     });
@@ -1227,18 +1221,18 @@ describe('Habit Resolver', () => {
     expect.assertions(5);
 
     const habit = habitRepository.create({
-      title: generateTitle(),
-      description: generateDescription(),
-      startDate: generateDate().toISOString()
+      title: dataGenerator.generateTitle(),
+      description: dataGenerator.generateDescription(),
+      startDate: dataGenerator.generateDate().toISOString()
     });
     const savedHabit = await habitRepository.save(habit);
 
     const user = userRepository.create({
-      email: generateEmail(),
-      password: generatePassword(),
-      username: generateUsername(),
-      firstname: generateName(),
-      lastname: generateName(),
+      email: dataGenerator.generateEmail(),
+      password: dataGenerator.generatePassword(),
+      username: dataGenerator.generateUsername(),
+      firstname: dataGenerator.generateName(),
+      lastname: dataGenerator.generateName(),
       habits: [habit]
     });
     await userRepository.save(user);
@@ -1249,7 +1243,7 @@ describe('Habit Resolver', () => {
       variableValues: {
         data: {
           habitId: savedHabit.id,
-          description: generateDescription(256)
+          description: dataGenerator.generateDescription(256)
         }
       }
     });
@@ -1267,18 +1261,18 @@ describe('Habit Resolver', () => {
     expect.assertions(4);
 
     const habit = habitRepository.create({
-      title: generateTitle(),
-      description: generateDescription(),
-      startDate: generateDate().toISOString()
+      title: dataGenerator.generateTitle(),
+      description: dataGenerator.generateDescription(),
+      startDate: dataGenerator.generateDate().toISOString()
     });
     const savedHabit = await habitRepository.save(habit);
 
     const user = userRepository.create({
-      email: generateEmail(),
-      password: generatePassword(),
-      username: generateUsername(),
-      firstname: generateName(),
-      lastname: generateName(),
+      email: dataGenerator.generateEmail(),
+      password: dataGenerator.generatePassword(),
+      username: dataGenerator.generateUsername(),
+      firstname: dataGenerator.generateName(),
+      lastname: dataGenerator.generateName(),
       habits: [habit]
     });
     await userRepository.save(user);
@@ -1289,8 +1283,8 @@ describe('Habit Resolver', () => {
       variableValues: {
         data: {
           habitId: savedHabit.id,
-          title: generateTitle(),
-          description: generateDescription(),
+          title: dataGenerator.generateTitle(),
+          description: dataGenerator.generateDescription(),
           startDate: 'invalid date'
         }
       }
@@ -1306,18 +1300,18 @@ describe('Habit Resolver', () => {
     expect.assertions(4);
 
     const habit = habitRepository.create({
-      title: generateTitle(),
-      description: generateDescription(),
-      startDate: generateDate().toISOString()
+      title: dataGenerator.generateTitle(),
+      description: dataGenerator.generateDescription(),
+      startDate: dataGenerator.generateDate().toISOString()
     });
     const savedHabit = await habitRepository.save(habit);
 
     const user = userRepository.create({
-      email: generateEmail(),
-      password: generatePassword(),
-      username: generateUsername(),
-      firstname: generateName(),
-      lastname: generateName(),
+      email: dataGenerator.generateEmail(),
+      password: dataGenerator.generatePassword(),
+      username: dataGenerator.generateUsername(),
+      firstname: dataGenerator.generateName(),
+      lastname: dataGenerator.generateName(),
       habits: [habit]
     });
     await userRepository.save(user);
@@ -1328,7 +1322,7 @@ describe('Habit Resolver', () => {
       variableValues: {
         data: {
           habitId: savedHabit.id,
-          title: generateTitle(),
+          title: dataGenerator.generateTitle(),
           startDate: 'invalid date'
         }
       }
@@ -1344,18 +1338,18 @@ describe('Habit Resolver', () => {
     expect.assertions(4);
 
     const habit = habitRepository.create({
-      title: generateTitle(),
-      description: generateDescription(),
-      startDate: generateDate().toISOString()
+      title: dataGenerator.generateTitle(),
+      description: dataGenerator.generateDescription(),
+      startDate: dataGenerator.generateDate().toISOString()
     });
     const savedHabit = await habitRepository.save(habit);
 
     const user = userRepository.create({
-      email: generateEmail(),
-      password: generatePassword(),
-      username: generateUsername(),
-      firstname: generateName(),
-      lastname: generateName(),
+      email: dataGenerator.generateEmail(),
+      password: dataGenerator.generatePassword(),
+      username: dataGenerator.generateUsername(),
+      firstname: dataGenerator.generateName(),
+      lastname: dataGenerator.generateName(),
       habits: [habit]
     });
     await userRepository.save(user);
@@ -1366,7 +1360,7 @@ describe('Habit Resolver', () => {
       variableValues: {
         data: {
           habitId: savedHabit.id,
-          description: generateDescription(),
+          description: dataGenerator.generateDescription(),
           startDate: 'invalid date'
         }
       }
@@ -1382,18 +1376,18 @@ describe('Habit Resolver', () => {
     expect.assertions(4);
 
     const habit = habitRepository.create({
-      title: generateTitle(),
-      description: generateDescription(),
-      startDate: generateDate().toISOString()
+      title: dataGenerator.generateTitle(),
+      description: dataGenerator.generateDescription(),
+      startDate: dataGenerator.generateDate().toISOString()
     });
     const savedHabit = await habitRepository.save(habit);
 
     const user = userRepository.create({
-      email: generateEmail(),
-      password: generatePassword(),
-      username: generateUsername(),
-      firstname: generateName(),
-      lastname: generateName(),
+      email: dataGenerator.generateEmail(),
+      password: dataGenerator.generatePassword(),
+      username: dataGenerator.generateUsername(),
+      firstname: dataGenerator.generateName(),
+      lastname: dataGenerator.generateName(),
       habits: [habit]
     });
     await userRepository.save(user);
@@ -1421,18 +1415,18 @@ describe('Habit Resolver', () => {
     const startDate = '2020-02-07T21:04:39.573Z';
 
     const habit = habitRepository.create({
-      title: generateTitle(),
-      description: generateDescription(),
-      startDate: generateDate().toISOString()
+      title: dataGenerator.generateTitle(),
+      description: dataGenerator.generateDescription(),
+      startDate: dataGenerator.generateDate().toISOString()
     });
     const savedHabit = await habitRepository.save(habit);
 
     const user = userRepository.create({
-      email: generateEmail(),
-      password: generatePassword(),
-      username: generateUsername(),
-      firstname: generateName(),
-      lastname: generateName(),
+      email: dataGenerator.generateEmail(),
+      password: dataGenerator.generatePassword(),
+      username: dataGenerator.generateUsername(),
+      firstname: dataGenerator.generateName(),
+      lastname: dataGenerator.generateName(),
       habits: [habit]
     });
     await userRepository.save(user);
@@ -1443,8 +1437,8 @@ describe('Habit Resolver', () => {
       variableValues: {
         data: {
           habitId: savedHabit.id,
-          title: generateTitle(65),
-          description: generateDescription(256),
+          title: dataGenerator.generateTitle(65),
+          description: dataGenerator.generateDescription(256),
           startDate: startDate
         }
       }
@@ -1466,18 +1460,18 @@ describe('Habit Resolver', () => {
     expect.assertions(6);
 
     const habit = habitRepository.create({
-      title: generateTitle(),
-      description: generateDescription(),
-      startDate: generateDate().toISOString()
+      title: dataGenerator.generateTitle(),
+      description: dataGenerator.generateDescription(),
+      startDate: dataGenerator.generateDate().toISOString()
     });
     const savedHabit = await habitRepository.save(habit);
 
     const user = userRepository.create({
-      email: generateEmail(),
-      password: generatePassword(),
-      username: generateUsername(),
-      firstname: generateName(),
-      lastname: generateName(),
+      email: dataGenerator.generateEmail(),
+      password: dataGenerator.generatePassword(),
+      username: dataGenerator.generateUsername(),
+      firstname: dataGenerator.generateName(),
+      lastname: dataGenerator.generateName(),
       habits: [habit]
     });
     await userRepository.save(user);
@@ -1488,8 +1482,8 @@ describe('Habit Resolver', () => {
       variableValues: {
         data: {
           habitId: savedHabit.id,
-          title: generateTitle(65),
-          description: generateDescription(256),
+          title: dataGenerator.generateTitle(65),
+          description: dataGenerator.generateDescription(256),
           startDate: 'invalid date'
         }
       }
@@ -1511,18 +1505,18 @@ describe('Habit Resolver', () => {
     expect.assertions(5);
 
     const habit = habitRepository.create({
-      title: generateTitle(),
-      description: generateDescription(),
-      startDate: generateDate().toISOString()
+      title: dataGenerator.generateTitle(),
+      description: dataGenerator.generateDescription(),
+      startDate: dataGenerator.generateDate().toISOString()
     });
     const savedHabit = await habitRepository.save(habit);
 
     const user = userRepository.create({
-      email: generateEmail(),
-      password: generatePassword(),
-      username: generateUsername(),
-      firstname: generateName(),
-      lastname: generateName(),
+      email: dataGenerator.generateEmail(),
+      password: dataGenerator.generatePassword(),
+      username: dataGenerator.generateUsername(),
+      firstname: dataGenerator.generateName(),
+      lastname: dataGenerator.generateName(),
       habits: [habit]
     });
     await userRepository.save(user);
@@ -1533,8 +1527,8 @@ describe('Habit Resolver', () => {
       variableValues: {
         data: {
           habitId: savedHabit.id,
-          title: generateTitle(65),
-          description: generateDescription(),
+          title: dataGenerator.generateTitle(65),
+          description: dataGenerator.generateDescription(),
           startDate: 'invalid date'
         }
       }
@@ -1553,18 +1547,18 @@ describe('Habit Resolver', () => {
     expect.assertions(5);
 
     const habit = habitRepository.create({
-      title: generateTitle(),
-      description: generateDescription(),
-      startDate: generateDate().toISOString()
+      title: dataGenerator.generateTitle(),
+      description: dataGenerator.generateDescription(),
+      startDate: dataGenerator.generateDate().toISOString()
     });
     const savedHabit = await habitRepository.save(habit);
 
     const user = userRepository.create({
-      email: generateEmail(),
-      password: generatePassword(),
-      username: generateUsername(),
-      firstname: generateName(),
-      lastname: generateName(),
+      email: dataGenerator.generateEmail(),
+      password: dataGenerator.generatePassword(),
+      username: dataGenerator.generateUsername(),
+      firstname: dataGenerator.generateName(),
+      lastname: dataGenerator.generateName(),
       habits: [habit]
     });
     await userRepository.save(user);
@@ -1575,8 +1569,8 @@ describe('Habit Resolver', () => {
       variableValues: {
         data: {
           habitId: savedHabit.id,
-          title: generateTitle(),
-          description: generateDescription(256),
+          title: dataGenerator.generateTitle(),
+          description: dataGenerator.generateDescription(256),
           startDate: 'invalid date'
         }
       }
@@ -1599,18 +1593,18 @@ describe('Habit Resolver', () => {
     const startDate = '2020-02-07T21:04:39.573Z';
 
     const habit = habitRepository.create({
-      title: generateTitle(),
-      description: generateDescription(),
-      startDate: generateDate().toISOString()
+      title: dataGenerator.generateTitle(),
+      description: dataGenerator.generateDescription(),
+      startDate: dataGenerator.generateDate().toISOString()
     });
     const savedHabit = await habitRepository.save(habit);
 
     const user = userRepository.create({
-      email: generateEmail(),
-      password: generatePassword(),
-      username: generateUsername(),
-      firstname: generateName(),
-      lastname: generateName(),
+      email: dataGenerator.generateEmail(),
+      password: dataGenerator.generatePassword(),
+      username: dataGenerator.generateUsername(),
+      firstname: dataGenerator.generateName(),
+      lastname: dataGenerator.generateName(),
       habits: []
     });
     await userRepository.save(user);
@@ -1641,18 +1635,18 @@ describe('Habit Resolver', () => {
     const startDate = '2020-02-07T21:04:39.573Z';
 
     const habit = habitRepository.create({
-      title: generateTitle(),
-      description: generateDescription(),
-      startDate: generateDate().toISOString()
+      title: dataGenerator.generateTitle(),
+      description: dataGenerator.generateDescription(),
+      startDate: dataGenerator.generateDate().toISOString()
     });
     const savedHabit = await habitRepository.save(habit);
 
     const user = userRepository.create({
-      email: generateEmail(),
-      password: generatePassword(),
-      username: generateUsername(),
-      firstname: generateName(),
-      lastname: generateName(),
+      email: dataGenerator.generateEmail(),
+      password: dataGenerator.generatePassword(),
+      username: dataGenerator.generateUsername(),
+      firstname: dataGenerator.generateName(),
+      lastname: dataGenerator.generateName(),
       habits: []
     });
     await userRepository.save(user);
@@ -1663,7 +1657,7 @@ describe('Habit Resolver', () => {
       variableValues: {
         data: {
           habitId: savedHabit.id,
-          title: generateTitle(65),
+          title: dataGenerator.generateTitle(65),
           description: description,
           startDate: startDate
         }
@@ -1684,9 +1678,9 @@ describe('Habit Resolver', () => {
       variableValues: {
         data: {
           habitId: 999,
-          title: generateTitle(),
-          description: generateDescription(),
-          startDate: generateDate().toISOString()
+          title: dataGenerator.generateTitle(),
+          description: dataGenerator.generateDescription(),
+          startDate: dataGenerator.generateDate().toISOString()
         }
       }
     });
@@ -1706,9 +1700,9 @@ describe('Habit Resolver', () => {
       variableValues: {
         data: {
           habitId: 999,
-          title: generateTitle(),
-          description: generateDescription(),
-          startDate: generateDate().toISOString()
+          title: dataGenerator.generateTitle(),
+          description: dataGenerator.generateDescription(),
+          startDate: dataGenerator.generateDate().toISOString()
         }
       }
     });
