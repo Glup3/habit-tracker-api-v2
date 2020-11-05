@@ -1,21 +1,33 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-
-import { Field, ID, ObjectType } from 'type-graphql';
+import { IsPositive, Max, Min } from 'class-validator';
+import { Field, ID, Int, ObjectType } from 'type-graphql';
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Habit } from './habit';
 
 @Entity()
 @ObjectType()
 export class Entry {
-  @Field((type) => ID)
+  @Field(() => ID)
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Field()
+  @Field(() => Int)
   @Column()
-  entryDate: Date;
+  @IsPositive()
+  year: number;
 
-  @Field((type) => Habit)
-  @ManyToOne((type) => Habit, (habit) => habit.entries)
+  @Field(() => Int)
+  @Column()
+  @Min(0)
+  @Max(12)
+  month: number;
+
+  @Field(() => Int)
+  @Column()
+  @Min(0)
+  @Max(31)
+  day: number;
+
+  @Field(() => Habit)
+  @ManyToOne(() => Habit, (habit) => habit.entries)
   habit: Habit;
 }

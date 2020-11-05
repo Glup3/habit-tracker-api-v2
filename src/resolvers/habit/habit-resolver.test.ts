@@ -1670,7 +1670,7 @@ describe('Habit Resolver', () => {
     expect(response.errors?.[0].message).toEqual(`Habit with the ID ${savedHabit.id} does not exist`);
   });
 
-  test('if user updates habit when he is not logged in with valid title, valid description and valid startDate and then it should return error "User is not logged in"', async () => {
+  test('if user updates habit when he is not logged in with valid title, valid description and valid startDate then it should return error "User is not logged in"', async () => {
     expect.assertions(4);
 
     const response = await gCall({
@@ -1691,7 +1691,7 @@ describe('Habit Resolver', () => {
     expect(response.errors?.[0].message).toContain('User is not logged in');
   });
 
-  test('if user who doesnt exist updates habit with valid title, valid description and valid startDate and then it should return error "Could not find any entity of type"', async () => {
+  test('if user who doesnt exist updates habit with valid title, valid description and valid startDate then it should return error "Could not find any entity of type"', async () => {
     expect.assertions(4);
 
     const response = await gCall({
