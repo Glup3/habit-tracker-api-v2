@@ -1,4 +1,4 @@
-import { Arg, Ctx, FieldResolver, Mutation, Query, Resolver, Root, UseMiddleware } from 'type-graphql';
+import { Arg, Ctx, FieldResolver, Int, Mutation, Query, Resolver, Root, UseMiddleware } from 'type-graphql';
 import { Repository } from 'typeorm';
 import { InjectRepository } from 'typeorm-typedi-extensions';
 import { Entry } from '../../entities/entry';
@@ -93,6 +93,7 @@ export class HabitResolver {
 
     return foundHabit.user;
   }
+  //TODO Add tests for this
 
   @FieldResolver()
   async entries(@Root() habit: Habit): Promise<Entry[]> {
@@ -103,4 +104,11 @@ export class HabitResolver {
 
     return entries;
   }
+  //TODO Add tests for this
+
+  @FieldResolver(() => Int)
+  async totalDays(@Root() habit: Habit): Promise<number> {
+    return await this.entryRepository.count({ where: { habit: habit } });
+  }
+  //TODO Add tests for this
 }

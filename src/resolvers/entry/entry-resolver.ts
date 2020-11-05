@@ -6,7 +6,7 @@ import { Entry } from '../../entities/entry';
 import { Habit } from '../../entities/habit';
 import { Authenticated } from '../../middlewares/authenticated';
 import { HabitOwner } from '../../middlewares/habitOwner';
-import { ToggleEntryInput } from './entry-input';
+import { EntriesForMonthInput, ToggleEntryInput } from './entry-input';
 import { ToggleEntryPayload, ToggleState } from './entry-types';
 
 @Resolver(Entry)
@@ -20,6 +20,20 @@ export class EntryResolver {
   entries(): Promise<Entry[]> {
     return this.entryRepository.find();
   }
+
+  @Query(() => [Entry])
+  @UseMiddleware(Authenticated, HabitOwner)
+  async entriesForMonth(@Arg('data') data: EntriesForMonthInput): Promise<Entry[]> {
+    const habit = await this.habitRepository.findOneOrFail(data.habitId);
+    return this.entryRepository.find({
+      where: {
+        habit: habit,
+        year: data.year,
+        month: data.month
+      }
+    });
+  }
+  //TODO test this
 
   @Mutation(() => ToggleEntryPayload)
   @UseMiddleware(Authenticated, HabitOwner)
@@ -67,4 +81,5 @@ export class EntryResolver {
 
     return foundEntry.habit;
   }
+  //TODO test this
 }

@@ -21,3 +21,18 @@ export class ToggleEntryInput implements Partial<Entry> {
   @Max(31)
   day: number;
 }
+
+@InputType()
+export class EntriesForMonthInput implements Partial<Entry> {
+  @Field(() => ID)
+  habitId: number;
+
+  @Field(() => Int)
+  @IsPositive()
+  year: number;
+
+  @Field(() => Int)
+  @Min(0)
+  @Max(12)
+  month: number;
+}
