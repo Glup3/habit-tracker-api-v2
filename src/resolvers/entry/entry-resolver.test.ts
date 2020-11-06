@@ -286,23 +286,677 @@ describe('Entry Resolver', () => {
     ).toEqual('month must not be greater than 12');
   });
 
-  //v year, v month, i day *
-  //v year, v month, i day *
-  //v year, i month, v day *
-  //v year, i month, v day *
-  //i year, v month, v day
-  //v year, i month, i day
-  //v year, i month, i day
-  //v year, i month, i day
-  //v year, i month, i day
-  //i year, i month, v day
-  //i year, i month, v day
-  //i year, v month, i day
-  //i year, v month, i day
-  //i year, i month, i day
-  //i year, i month, i day
-  //i year, i month, i day
-  //i year, i month, i day
+  test('if user toggles not existing entry with invalid year, valid month and valid day on a habit he owns then it should return Argument Validation Error', async () => {
+    expect.assertions(5);
+
+    const year = -2020;
+    const month = 13;
+    const day = 20;
+
+    const habit = await habitRepository.save(
+      habitRepository.create({
+        title: dataGenerator.generateTitle(),
+        description: dataGenerator.generateDescription(),
+        startDate: dataGenerator.generateDate().toISOString()
+      })
+    );
+
+    const user = await userRepository.save(
+      userRepository.create({
+        email: dataGenerator.generateEmail(),
+        password: dataGenerator.generatePassword(),
+        username: dataGenerator.generateUsername(),
+        firstname: dataGenerator.generateName(),
+        lastname: dataGenerator.generateName(),
+        habits: [habit]
+      })
+    );
+
+    const response = await gCall({
+      source: toggleEntryMutation,
+      username: user.username,
+      variableValues: {
+        data: {
+          habitId: habit.id,
+          year: year,
+          month: month,
+          day: day
+        }
+      }
+    });
+
+    expect(response.data).toBeNull();
+    expect(response.errors).not.toBeNull();
+    expect(response.errors?.length).toEqual(1);
+    expect(response.errors?.[0].message).toEqual('Argument Validation Error');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[0].constraints?.isPositive
+    ).toEqual('year must be a positive number');
+  });
+
+  test('if user toggles not existing entry with valid year, invalid month (month > 12) and invalid day (day > 31) on a habit he owns then it should return Argument Validation Error', async () => {
+    expect.assertions(6);
+
+    const year = 2020;
+    const month = 13;
+    const day = 32;
+
+    const habit = await habitRepository.save(
+      habitRepository.create({
+        title: dataGenerator.generateTitle(),
+        description: dataGenerator.generateDescription(),
+        startDate: dataGenerator.generateDate().toISOString()
+      })
+    );
+
+    const user = await userRepository.save(
+      userRepository.create({
+        email: dataGenerator.generateEmail(),
+        password: dataGenerator.generatePassword(),
+        username: dataGenerator.generateUsername(),
+        firstname: dataGenerator.generateName(),
+        lastname: dataGenerator.generateName(),
+        habits: [habit]
+      })
+    );
+
+    const response = await gCall({
+      source: toggleEntryMutation,
+      username: user.username,
+      variableValues: {
+        data: {
+          habitId: habit.id,
+          year: year,
+          month: month,
+          day: day
+        }
+      }
+    });
+
+    expect(response.data).toBeNull();
+    expect(response.errors).not.toBeNull();
+    expect(response.errors?.length).toEqual(1);
+    expect(response.errors?.[0].message).toEqual('Argument Validation Error');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[0].constraints?.max
+    ).toEqual('month must not be greater than 12');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[1].constraints?.max
+    ).toEqual('day must not be greater than 31');
+  });
+
+  test('if user toggles not existing entry with valid year, invalid month (month < 0) and invalid day (day > 31) on a habit he owns then it should return Argument Validation Error', async () => {
+    expect.assertions(6);
+
+    const year = 2020;
+    const month = -8;
+    const day = 32;
+
+    const habit = await habitRepository.save(
+      habitRepository.create({
+        title: dataGenerator.generateTitle(),
+        description: dataGenerator.generateDescription(),
+        startDate: dataGenerator.generateDate().toISOString()
+      })
+    );
+
+    const user = await userRepository.save(
+      userRepository.create({
+        email: dataGenerator.generateEmail(),
+        password: dataGenerator.generatePassword(),
+        username: dataGenerator.generateUsername(),
+        firstname: dataGenerator.generateName(),
+        lastname: dataGenerator.generateName(),
+        habits: [habit]
+      })
+    );
+
+    const response = await gCall({
+      source: toggleEntryMutation,
+      username: user.username,
+      variableValues: {
+        data: {
+          habitId: habit.id,
+          year: year,
+          month: month,
+          day: day
+        }
+      }
+    });
+
+    expect(response.data).toBeNull();
+    expect(response.errors).not.toBeNull();
+    expect(response.errors?.length).toEqual(1);
+    expect(response.errors?.[0].message).toEqual('Argument Validation Error');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[0].constraints?.min
+    ).toEqual('month must not be less than 0');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[1].constraints?.max
+    ).toEqual('day must not be greater than 31');
+  });
+
+  test('if user toggles not existing entry with valid year, invalid month (month > 12) and invalid day (day < 0) on a habit he owns then it should return Argument Validation Error', async () => {
+    expect.assertions(6);
+
+    const year = 2020;
+    const month = 13;
+    const day = -20;
+
+    const habit = await habitRepository.save(
+      habitRepository.create({
+        title: dataGenerator.generateTitle(),
+        description: dataGenerator.generateDescription(),
+        startDate: dataGenerator.generateDate().toISOString()
+      })
+    );
+
+    const user = await userRepository.save(
+      userRepository.create({
+        email: dataGenerator.generateEmail(),
+        password: dataGenerator.generatePassword(),
+        username: dataGenerator.generateUsername(),
+        firstname: dataGenerator.generateName(),
+        lastname: dataGenerator.generateName(),
+        habits: [habit]
+      })
+    );
+
+    const response = await gCall({
+      source: toggleEntryMutation,
+      username: user.username,
+      variableValues: {
+        data: {
+          habitId: habit.id,
+          year: year,
+          month: month,
+          day: day
+        }
+      }
+    });
+
+    expect(response.data).toBeNull();
+    expect(response.errors).not.toBeNull();
+    expect(response.errors?.length).toEqual(1);
+    expect(response.errors?.[0].message).toEqual('Argument Validation Error');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[0].constraints?.max
+    ).toEqual('month must not be greater than 12');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[1].constraints?.min
+    ).toEqual('day must not be less than 0');
+  });
+
+  test('if user toggles not existing entry with valid year, invalid month (month < 0) and invalid day (day < 0) on a habit he owns then it should return Argument Validation Error', async () => {
+    expect.assertions(6);
+
+    const year = 2020;
+    const month = -8;
+    const day = -20;
+
+    const habit = await habitRepository.save(
+      habitRepository.create({
+        title: dataGenerator.generateTitle(),
+        description: dataGenerator.generateDescription(),
+        startDate: dataGenerator.generateDate().toISOString()
+      })
+    );
+
+    const user = await userRepository.save(
+      userRepository.create({
+        email: dataGenerator.generateEmail(),
+        password: dataGenerator.generatePassword(),
+        username: dataGenerator.generateUsername(),
+        firstname: dataGenerator.generateName(),
+        lastname: dataGenerator.generateName(),
+        habits: [habit]
+      })
+    );
+
+    const response = await gCall({
+      source: toggleEntryMutation,
+      username: user.username,
+      variableValues: {
+        data: {
+          habitId: habit.id,
+          year: year,
+          month: month,
+          day: day
+        }
+      }
+    });
+
+    expect(response.data).toBeNull();
+    expect(response.errors).not.toBeNull();
+    expect(response.errors?.length).toEqual(1);
+    expect(response.errors?.[0].message).toEqual('Argument Validation Error');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[0].constraints?.min
+    ).toEqual('month must not be less than 0');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[1].constraints?.min
+    ).toEqual('day must not be less than 0');
+  });
+
+  test('if user toggles not existing entry with invalid year, invalid month (month < 0) and valid day on a habit he owns then it should return Argument Validation Error', async () => {
+    expect.assertions(6);
+
+    const year = -2020;
+    const month = -8;
+    const day = 20;
+
+    const habit = await habitRepository.save(
+      habitRepository.create({
+        title: dataGenerator.generateTitle(),
+        description: dataGenerator.generateDescription(),
+        startDate: dataGenerator.generateDate().toISOString()
+      })
+    );
+
+    const user = await userRepository.save(
+      userRepository.create({
+        email: dataGenerator.generateEmail(),
+        password: dataGenerator.generatePassword(),
+        username: dataGenerator.generateUsername(),
+        firstname: dataGenerator.generateName(),
+        lastname: dataGenerator.generateName(),
+        habits: [habit]
+      })
+    );
+
+    const response = await gCall({
+      source: toggleEntryMutation,
+      username: user.username,
+      variableValues: {
+        data: {
+          habitId: habit.id,
+          year: year,
+          month: month,
+          day: day
+        }
+      }
+    });
+
+    expect(response.data).toBeNull();
+    expect(response.errors).not.toBeNull();
+    expect(response.errors?.length).toEqual(1);
+    expect(response.errors?.[0].message).toEqual('Argument Validation Error');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[0].constraints?.isPositive
+    ).toEqual('year must be a positive number');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[1].constraints?.min
+    ).toEqual('month must not be less than 0');
+  });
+
+  test('if user toggles not existing entry with invalid year, invalid month (month > 12) and valid day on a habit he owns then it should return Argument Validation Error', async () => {
+    expect.assertions(6);
+
+    const year = -2020;
+    const month = 13;
+    const day = 20;
+
+    const habit = await habitRepository.save(
+      habitRepository.create({
+        title: dataGenerator.generateTitle(),
+        description: dataGenerator.generateDescription(),
+        startDate: dataGenerator.generateDate().toISOString()
+      })
+    );
+
+    const user = await userRepository.save(
+      userRepository.create({
+        email: dataGenerator.generateEmail(),
+        password: dataGenerator.generatePassword(),
+        username: dataGenerator.generateUsername(),
+        firstname: dataGenerator.generateName(),
+        lastname: dataGenerator.generateName(),
+        habits: [habit]
+      })
+    );
+
+    const response = await gCall({
+      source: toggleEntryMutation,
+      username: user.username,
+      variableValues: {
+        data: {
+          habitId: habit.id,
+          year: year,
+          month: month,
+          day: day
+        }
+      }
+    });
+
+    expect(response.data).toBeNull();
+    expect(response.errors).not.toBeNull();
+    expect(response.errors?.length).toEqual(1);
+    expect(response.errors?.[0].message).toEqual('Argument Validation Error');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[0].constraints?.isPositive
+    ).toEqual('year must be a positive number');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[1].constraints?.max
+    ).toEqual('month must not be greater than 12');
+  });
+
+  test('if user toggles not existing entry with invalid year, valid month and invalid day (day < 0) on a habit he owns then it should return Argument Validation Error', async () => {
+    expect.assertions(6);
+
+    const year = -2020;
+    const month = 8;
+    const day = -20;
+
+    const habit = await habitRepository.save(
+      habitRepository.create({
+        title: dataGenerator.generateTitle(),
+        description: dataGenerator.generateDescription(),
+        startDate: dataGenerator.generateDate().toISOString()
+      })
+    );
+
+    const user = await userRepository.save(
+      userRepository.create({
+        email: dataGenerator.generateEmail(),
+        password: dataGenerator.generatePassword(),
+        username: dataGenerator.generateUsername(),
+        firstname: dataGenerator.generateName(),
+        lastname: dataGenerator.generateName(),
+        habits: [habit]
+      })
+    );
+
+    const response = await gCall({
+      source: toggleEntryMutation,
+      username: user.username,
+      variableValues: {
+        data: {
+          habitId: habit.id,
+          year: year,
+          month: month,
+          day: day
+        }
+      }
+    });
+
+    expect(response.data).toBeNull();
+    expect(response.errors).not.toBeNull();
+    expect(response.errors?.length).toEqual(1);
+    expect(response.errors?.[0].message).toEqual('Argument Validation Error');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[0].constraints?.isPositive
+    ).toEqual('year must be a positive number');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[1].constraints?.min
+    ).toEqual('day must not be less than 0');
+  });
+
+  test('if user toggles not existing entry with invalid year, valid month and invalid day (day > 31) on a habit he owns then it should return Argument Validation Error', async () => {
+    expect.assertions(6);
+
+    const year = -2020;
+    const month = 8;
+    const day = 32;
+
+    const habit = await habitRepository.save(
+      habitRepository.create({
+        title: dataGenerator.generateTitle(),
+        description: dataGenerator.generateDescription(),
+        startDate: dataGenerator.generateDate().toISOString()
+      })
+    );
+
+    const user = await userRepository.save(
+      userRepository.create({
+        email: dataGenerator.generateEmail(),
+        password: dataGenerator.generatePassword(),
+        username: dataGenerator.generateUsername(),
+        firstname: dataGenerator.generateName(),
+        lastname: dataGenerator.generateName(),
+        habits: [habit]
+      })
+    );
+
+    const response = await gCall({
+      source: toggleEntryMutation,
+      username: user.username,
+      variableValues: {
+        data: {
+          habitId: habit.id,
+          year: year,
+          month: month,
+          day: day
+        }
+      }
+    });
+
+    expect(response.data).toBeNull();
+    expect(response.errors).not.toBeNull();
+    expect(response.errors?.length).toEqual(1);
+    expect(response.errors?.[0].message).toEqual('Argument Validation Error');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[0].constraints?.isPositive
+    ).toEqual('year must be a positive number');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[1].constraints?.max
+    ).toEqual('day must not be greater than 31');
+  });
+
+  test('if user toggles not existing entry with invalid year, invalid month (month > 12) and invalid day (day > 31) on a habit he owns then it should return Argument Validation Error', async () => {
+    expect.assertions(7);
+
+    const year = -2020;
+    const month = 13;
+    const day = 32;
+
+    const habit = await habitRepository.save(
+      habitRepository.create({
+        title: dataGenerator.generateTitle(),
+        description: dataGenerator.generateDescription(),
+        startDate: dataGenerator.generateDate().toISOString()
+      })
+    );
+
+    const user = await userRepository.save(
+      userRepository.create({
+        email: dataGenerator.generateEmail(),
+        password: dataGenerator.generatePassword(),
+        username: dataGenerator.generateUsername(),
+        firstname: dataGenerator.generateName(),
+        lastname: dataGenerator.generateName(),
+        habits: [habit]
+      })
+    );
+
+    const response = await gCall({
+      source: toggleEntryMutation,
+      username: user.username,
+      variableValues: {
+        data: {
+          habitId: habit.id,
+          year: year,
+          month: month,
+          day: day
+        }
+      }
+    });
+
+    expect(response.data).toBeNull();
+    expect(response.errors).not.toBeNull();
+    expect(response.errors?.length).toEqual(1);
+    expect(response.errors?.[0].message).toEqual('Argument Validation Error');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[0].constraints?.isPositive
+    ).toEqual('year must be a positive number');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[1].constraints?.max
+    ).toEqual('month must not be greater than 12');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[2].constraints?.max
+    ).toEqual('day must not be greater than 31');
+  });
+
+  test('if user toggles not existing entry with invalid year, invalid month (month < 0) and invalid day (day > 31) on a habit he owns then it should return Argument Validation Error', async () => {
+    expect.assertions(7);
+
+    const year = -2020;
+    const month = -8;
+    const day = 32;
+
+    const habit = await habitRepository.save(
+      habitRepository.create({
+        title: dataGenerator.generateTitle(),
+        description: dataGenerator.generateDescription(),
+        startDate: dataGenerator.generateDate().toISOString()
+      })
+    );
+
+    const user = await userRepository.save(
+      userRepository.create({
+        email: dataGenerator.generateEmail(),
+        password: dataGenerator.generatePassword(),
+        username: dataGenerator.generateUsername(),
+        firstname: dataGenerator.generateName(),
+        lastname: dataGenerator.generateName(),
+        habits: [habit]
+      })
+    );
+
+    const response = await gCall({
+      source: toggleEntryMutation,
+      username: user.username,
+      variableValues: {
+        data: {
+          habitId: habit.id,
+          year: year,
+          month: month,
+          day: day
+        }
+      }
+    });
+
+    expect(response.data).toBeNull();
+    expect(response.errors).not.toBeNull();
+    expect(response.errors?.length).toEqual(1);
+    expect(response.errors?.[0].message).toEqual('Argument Validation Error');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[0].constraints?.isPositive
+    ).toEqual('year must be a positive number');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[1].constraints?.min
+    ).toEqual('month must not be less than 0');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[2].constraints?.max
+    ).toEqual('day must not be greater than 31');
+  });
+
+  test('if user toggles not existing entry with invalid year, invalid month (month > 12) and invalid day (day < 0) on a habit he owns then it should return Argument Validation Error', async () => {
+    expect.assertions(7);
+
+    const year = -2020;
+    const month = 13;
+    const day = -20;
+
+    const habit = await habitRepository.save(
+      habitRepository.create({
+        title: dataGenerator.generateTitle(),
+        description: dataGenerator.generateDescription(),
+        startDate: dataGenerator.generateDate().toISOString()
+      })
+    );
+
+    const user = await userRepository.save(
+      userRepository.create({
+        email: dataGenerator.generateEmail(),
+        password: dataGenerator.generatePassword(),
+        username: dataGenerator.generateUsername(),
+        firstname: dataGenerator.generateName(),
+        lastname: dataGenerator.generateName(),
+        habits: [habit]
+      })
+    );
+
+    const response = await gCall({
+      source: toggleEntryMutation,
+      username: user.username,
+      variableValues: {
+        data: {
+          habitId: habit.id,
+          year: year,
+          month: month,
+          day: day
+        }
+      }
+    });
+
+    expect(response.data).toBeNull();
+    expect(response.errors).not.toBeNull();
+    expect(response.errors?.length).toEqual(1);
+    expect(response.errors?.[0].message).toEqual('Argument Validation Error');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[0].constraints?.isPositive
+    ).toEqual('year must be a positive number');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[1].constraints?.max
+    ).toEqual('month must not be greater than 12');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[2].constraints?.min
+    ).toEqual('day must not be less than 0');
+  });
+
+  test('if user toggles not existing entry with invalid year, invalid month (month < 0) and invalid day (day < 0) on a habit he owns then it should return Argument Validation Error', async () => {
+    expect.assertions(7);
+
+    const year = -2020;
+    const month = -8;
+    const day = -20;
+
+    const habit = await habitRepository.save(
+      habitRepository.create({
+        title: dataGenerator.generateTitle(),
+        description: dataGenerator.generateDescription(),
+        startDate: dataGenerator.generateDate().toISOString()
+      })
+    );
+
+    const user = await userRepository.save(
+      userRepository.create({
+        email: dataGenerator.generateEmail(),
+        password: dataGenerator.generatePassword(),
+        username: dataGenerator.generateUsername(),
+        firstname: dataGenerator.generateName(),
+        lastname: dataGenerator.generateName(),
+        habits: [habit]
+      })
+    );
+
+    const response = await gCall({
+      source: toggleEntryMutation,
+      username: user.username,
+      variableValues: {
+        data: {
+          habitId: habit.id,
+          year: year,
+          month: month,
+          day: day
+        }
+      }
+    });
+
+    expect(response.data).toBeNull();
+    expect(response.errors).not.toBeNull();
+    expect(response.errors?.length).toEqual(1);
+    expect(response.errors?.[0].message).toEqual('Argument Validation Error');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[0].constraints?.isPositive
+    ).toEqual('year must be a positive number');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[1].constraints?.min
+    ).toEqual('month must not be less than 0');
+    expect(
+      (<Maybe<ArgumentValidationError>>response.errors?.[0].originalError)?.validationErrors[2].constraints?.min
+    ).toEqual('day must not be less than 0');
+  });
 
   test('if user toggles existing entry with valid year, valid month and valid day on a habit he owns then it should return removed entry + toggleState REMOVED', async () => {
     expect.assertions(1);
@@ -365,24 +1019,6 @@ describe('Entry Resolver', () => {
       }
     });
   });
-
-  //v year, v month, i day
-  //v year, v month, i day
-  //v year, i month, v day
-  //v year, i month, v day
-  //i year, v month, v day
-  //v year, i month, i day
-  //v year, i month, i day
-  //v year, i month, i day
-  //v year, i month, i day
-  //i year, i month, v day
-  //i year, i month, v day
-  //i year, v month, i day
-  //i year, v month, i day
-  //i year, i month, i day
-  //i year, i month, i day
-  //i year, i month, i day
-  //i year, i month, i day
 
   test('if user toggles not existing entry with valid year, valid month and valid day on a habit he doesnt own then it should return error "Habit with the ID does not exist', async () => {
     expect.assertions(4);
