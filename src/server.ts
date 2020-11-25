@@ -9,7 +9,6 @@ import { createSchema } from './utils/createSchema';
 
 export const createServer = async (): Promise<express.Express> => {
   const server = express();
-
   const schema = await createSchema();
 
   const apolloServer = new ApolloServer({
@@ -23,12 +22,17 @@ export const createServer = async (): Promise<express.Express> => {
     algorithms: ['HS256']
   });
 
+  const corsOptions = {
+    origin: 'http://localhost:3000',
+    optionsSuccessStatus: 200,
+    credentials: true
+  };
+
   server.use(cookieParser());
-
   server.use(authMiddleware);
-
   server.use(bodyParser.json(), auth);
-  apolloServer.applyMiddleware({ app: server });
+
+  apolloServer.applyMiddleware({ app: server, cors: corsOptions });
 
   return server;
 };
